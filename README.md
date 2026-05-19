@@ -7,7 +7,7 @@ A browser-based hex-grid strategy game for 2–4 players (or fully AI-driven sim
 ### Setup
 
 - **2–4 players** start with one base vertex each, placed evenly around the outer ring of the board.
-- Each player begins every turn with **4 AP** (Action Points), configurable in the setup screen.
+- Each player begins every turn with **5 AP** (Action Points), configurable in the setup screen.
 
 ### On your turn
 
@@ -27,13 +27,15 @@ Spend AP on any combination of actions:
 
 ### Special powers
 
-Certain outer-ring hexes hide a power token. Stepping on them grants one of:
+Certain outer-ring hexes hide a power token. Claiming all 6 vertices of that hex grants one of:
 
 - **+1 AP / turn** — permanent bonus AP at the start of each turn.
 - **Bank +2** — raises your bank capacity to 8.
 - **Cheap gamble** — gamble costs 1 AP less.
 - **Defensive shield** — your base is immune to attack for 2 turns.
 - **AP refund** — successful attacks return 1 AP.
+- **AP surge** — immediately gain +3 AP when you collect this power.
+- **Counter** — each time an enemy attacks one of your non-base vertices, you gain +1 AP.
 
 ### Winning
 
@@ -56,6 +58,8 @@ When playing against AI (or running a simulation with 0 humans), each AI slot ca
 | **Builder** | Focuses on expansion and center control |
 | **Turtle** | Defends and gambles |
 | **Runner** | Moves aggressively to reposition |
+| **Collector** | Hunts power tokens above all else |
+| **Eliminator** | Relentlessly pursues enemy elimination |
 
 ## How to run
 
