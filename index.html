@@ -422,6 +422,7 @@ function initGameState(opts){
       archetype: opts.archetypes[p]||'balanced',
       ap:costs.startAP, bank:0, maxBank:MAX_BANK_DEFAULT,
       alive:true, baseKey:bv.key, powers:[], shieldTurns:0,
+      staleTurns:0, lastVertCount:1,
       stats:{ build:0, move:0, attackNormal:0, attackBase:0, gamble:0, bank:0, gambleNet:0 }
     });
   }
@@ -910,6 +911,11 @@ function endTurn(){
 function nextPlayer(){
   const cp=G.players[G.currentPlayer];
   if(cp.shieldTurns>0) cp.shieldTurns--;
+  // stalemate tracking: count consecutive turns with no vertex gain
+  if(!cp.isHuman){
+    const vc=G.vertices.filter(v=>v.owner===cp.id).length;
+    if(vc<=cp.lastVertCount) cp.staleTurns++; else { cp.staleTurns=0; cp.lastVertCount=vc; }
+  }
   let next=(G.currentPlayer+1)%G.players.length, tries=0;
   while(!G.players[next].alive&&tries<G.players.length){ next=(next+1)%G.players.length; tries++; }
   if(next<=G.currentPlayer) G.turnNum++;
@@ -935,7 +941,18 @@ function nextPlayer(){
 
 // ── AI ───────────────────────────────────────────────
 function aiPickAction(p){
-  const arch=AI_ARCHETYPES[p.archetype]||AI_ARCHETYPES.balanced;
+  const baseArch=AI_ARCHETYPES[p.archetype]||AI_ARCHETYPES.balanced;
+  // stale-break: after 3+ static turns, shift strategy toward aggression+movement
+  let arch=baseArch;
+  if(p.staleTurns>=3){
+    const boost=Math.min(p.staleTurns-2, 4)*0.25; // up to +1.0 over 4 stale turns
+    arch={...baseArch,
+      aggression: Math.min(baseArch.aggression+boost*1.2, 2.5),
+      movement:   Math.min(baseArch.movement+boost*0.8,  3.0),
+      gambleChance: Math.min(baseArch.gambleChance+boost*0.1, 0.6),
+    };
+    if(!G.isSim && p.staleTurns===3) log(`${p.name} keičia strategiją (${p.staleTurns} ėjimai be progreso)!`,'warn');
+  }
   const myKeys=new Set(G.vertices.filter(v=>v.owner===p.id).map(v=>v.key));
   const candidates=[];
 
@@ -1004,9 +1021,12 @@ function aiPickAction(p){
 
   if(candidates.length===0) return null;
   candidates.sort((a,b)=>b.score-a.score);
-  const top=candidates.slice(0, Math.min(3, candidates.length));
+  // stale-break: consider more candidates to avoid repeating the same move
+  const topN = p.staleTurns>=3 ? Math.min(5, candidates.length) : Math.min(3, candidates.length);
+  const top=candidates.slice(0, topN);
   if(top[0].score<0 && top[0].type!=='attack') return null;
-  return top[Math.floor(Math.random()*Math.min(top.length, 2))];
+  const pickN = p.staleTurns>=3 ? Math.min(top.length, 3) : Math.min(top.length, 2);
+  return top[Math.floor(Math.random()*pickN)];
 }
 
 function aiExecuteAction(p, act){
