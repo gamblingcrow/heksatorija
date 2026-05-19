@@ -36,6 +36,19 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;fo
 .power-toggle .pt-icon{color:var(--purple);font-size:14px;}
 .power-toggle .pt-label{flex:1;}
 .power-toggle .pt-check{font-size:14px;}
+.option-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;cursor:pointer;}
+.option-row input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+.cp-form{display:flex;flex-direction:column;gap:6px;margin-top:8px;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;}
+.cp-form label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:-2px;}
+.cp-form input,.cp-form select,.cp-form textarea{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 7px;border-radius:3px;font-size:12px;font-family:inherit;width:100%;}
+.cp-form input:focus,.cp-form select:focus,.cp-form textarea:focus{outline:none;border-color:var(--gold-dim);}
+.cp-form textarea{resize:none;height:44px;}
+.cp-form-row{display:flex;gap:6px;}
+.cp-form-row>*{flex:1;}
+.cp-add-btn{background:var(--purple);border:none;color:#fff;padding:7px;border-radius:3px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.05em;}
+.cp-add-btn:hover{opacity:.85;}
+.pt-del{background:none;border:none;color:#e74c3c;font-size:13px;cursor:pointer;padding:0 2px;opacity:.6;}
+.pt-del:hover{opacity:1;}
 .archetype-row{display:flex;align-items:center;gap:8px;padding:3px 0;}
 .archetype-row .ar-dot{width:10px;height:10px;border-radius:50%;}
 .archetype-row .ar-name{font-size:12px;flex:1;}
@@ -176,9 +189,10 @@ canvas{display:block;touch-action:manipulation;}
       <label>AP per ėjimą (bazė)</label>
       <div class="cost-stepper" style="align-self:flex-start;">
         <button onclick="adj('startAP',-1)">−</button>
-        <div class="cost-val" id="val-startAP">4</div>
+        <div class="cost-val" id="val-startAP">5</div>
         <button onclick="adj('startAP',1)">+</button>
       </div>
+      <label class="option-row" style="margin-top:4px;"><input type="checkbox" id="auto-end-toggle" onchange="autoEndTurn=this.checked"> Automatiškai baigti ėjimą (0 AP)</label>
     </div>
 
     <div class="setup-box">
@@ -200,22 +214,50 @@ canvas{display:block;touch-action:manipulation;}
       <div class="cost-row"><span>🏗 Statyba (centras)</span><div class="cost-stepper"><button onclick="adj('buildCenter',-1)">−</button><div class="cost-val" id="val-buildCenter">3</div><button onclick="adj('buildCenter',1)">+</button></div></div>
       <div class="cost-row"><span>🚶 Judėjimas</span><div class="cost-stepper"><button onclick="adj('move',-1)">−</button><div class="cost-val" id="val-move">2</div><button onclick="adj('move',1)">+</button></div></div>
       <div class="cost-row"><span>⚔️ Puolimas (paprastas)</span><div class="cost-stepper"><button onclick="adj('attackNormal',-1)">−</button><div class="cost-val" id="val-attackNormal">3</div><button onclick="adj('attackNormal',1)">+</button></div></div>
-      <div class="cost-row"><span>⚔️ Puolimas (centras)</span><div class="cost-stepper"><button onclick="adj('attackCenter',-1)">−</button><div class="cost-val" id="val-attackCenter">4</div><button onclick="adj('attackCenter',1)">+</button></div></div>
+      <div class="cost-row"><span>⚔️ Puolimas (centras)</span><div class="cost-stepper"><button onclick="adj('attackCenter',-1)">−</button><div class="cost-val" id="val-attackCenter">5</div><button onclick="adj('attackCenter',1)">+</button></div></div>
       <div class="cost-row"><span>⚔️ Puolimas (bazė)</span><div class="cost-stepper"><button onclick="adj('attackBase',-1)">−</button><div class="cost-val" id="val-attackBase">5</div><button onclick="adj('attackBase',1)">+</button></div></div>
       <div class="cost-row"><span>🎲 Lošimas</span><div class="cost-stepper"><button onclick="adj('gamble',-1)">−</button><div class="cost-val" id="val-gamble">3</div><button onclick="adj('gamble',1)">+</button></div></div>
       <div class="help" style="margin-top:6px;">Lošimas: d6, EV ≈ 1−C/6 AP. Mažesnė kaina = pelningesnis lošimas.</div>
     </div>
 
     <div class="setup-box">
-      <h3>Specialios Galios <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;">(įjunk arba išjunk)</span></h3>
-      <div id="powers-list"></div>
-      <div class="help" style="margin-top:4px;">Įjungtos galios atsiranda kaip ✦ heksagonai lentoje.</div>
+      <h3>Specialios Galios</h3>
+      <label class="option-row"><input type="checkbox" id="powers-master-toggle" checked onchange="togglePowersEnabled(this.checked)"> Naudoti specialias galias</label>
+      <div id="powers-body">
+        <div id="powers-list"></div>
+        <div class="help" style="margin-top:4px;">Paspaudžiant galią ją įjungi arba išjungi. Įjungtos galios atsiranda kaip ✦ heksagonai lentoje.</div>
+        <div class="cp-form" id="custom-power-form">
+          <b style="font-size:11px;color:var(--gold);">+ Sukurti savo galią</b>
+          <div class="cp-form-row">
+            <div><label>Pavadinimas</label><input id="cp-name" type="text" maxlength="18" placeholder="Mano galia"></div>
+            <div><label>Ikona (1-2 rašt.)</label><input id="cp-icon" type="text" maxlength="2" placeholder="★"></div>
+          </div>
+          <label>Aprašymas</label>
+          <textarea id="cp-desc" placeholder="Ką ši galia daro?"></textarea>
+          <div class="cp-form-row">
+            <div>
+              <label>Efektas</label>
+              <select id="cp-effect" onchange="updateCPValueVisibility()">
+                <option value="ap_surge">Momentinis AP (+N iš karto)</option>
+                <option value="ap_bonus">+N AP kas ėjimą</option>
+                <option value="refund">AP grąžinimas puolant</option>
+                <option value="counter">AP kontrataka (kai puolamas)</option>
+                <option value="bank_bonus">Banko talpos +N</option>
+                <option value="shield">Gynybinis skydas (N ėjimų)</option>
+                <option value="cheap_gamble">Pigus lošimas (−1 lošimo kaina)</option>
+              </select>
+            </div>
+            <div id="cp-val-wrap"><label>Reikšmė (N)</label><input id="cp-value" type="number" min="1" max="6" value="2"></div>
+          </div>
+          <button class="cp-add-btn" onclick="addCustomPower()">PRIDĖTI GALIĄ</button>
+        </div>
+      </div>
     </div>
 
     <div class="setup-box" id="ai-box">
       <h3>AI Strategijos</h3>
       <div id="ai-archetypes-list"></div>
-      <div class="help">Aggressor – puola; Builder – plečiasi; Turtle – gynyba+lošimas; Bėgikas – juda+repozicionuoja; Balanced – mišrus.</div>
+      <div class="help">Balanced – mišrus; Aggressor – puola; Builder – plečiasi; Turtle – gynyba+lošimas; Bėgikas – juda; Kolekcioner – renka galias; Eliminatorius – naikina priešus.</div>
     </div>
 
     <div class="setup-box" id="sim-box" style="display:none;">
@@ -288,21 +330,73 @@ const ALL_POWERS=[
   {id:2, name:'Pigus lošimas',   short:'🎲', desc:'Lošimas kainuoja 1 AP mažiau.',                     effect:'cheap_gamble'},
   {id:3, name:'Gynybinis skydas',short:'🛡', desc:'Tavo bazė imuni puolimui 2 ėjimus.',                effect:'shield'},
   {id:4, name:'AP grąžinimas',   short:'↺', desc:'Sėkmingo puolimo metu gauni 1 AP atgal.',           effect:'refund'},
+  {id:5, name:'AP šuolis',       short:'⚡', desc:'Iš karto gauni +3 AP, kai atskleidi šią galią.',    effect:'ap_surge'},
+  {id:6, name:'Kontrataka',      short:'↩', desc:'Kai priešas atakuoja tavo figūrėlę (ne bazę), gauni +1 AP.',effect:'counter'},
 ];
 
-// movement field controls how willing AI is to spend AP on moves
+// movement/powerSeeking control AI willingness to spend AP on moves/power collection
 const AI_ARCHETYPES={
-  balanced:  { label:'Balanced',  aggression:1.0, expansion:1.0, defense:1.0, gambleChance:0.20, centerPriority:1.0, movement:0.7 },
-  aggressor: { label:'Aggressor', aggression:1.7, expansion:0.7, defense:0.5, gambleChance:0.10, centerPriority:0.6, movement:0.4 },
-  builder:   { label:'Builder',   aggression:0.5, expansion:1.6, defense:1.0, gambleChance:0.15, centerPriority:1.5, movement:0.4 },
-  turtle:    { label:'Turtle',    aggression:0.4, expansion:0.7, defense:1.6, gambleChance:0.45, centerPriority:0.8, movement:0.3 },
-  runner:    { label:'Bėgikas',   aggression:0.9, expansion:0.9, defense:0.7, gambleChance:0.15, centerPriority:1.4, movement:2.8 },
+  balanced:   { label:'Balanced',    aggression:0.85, expansion:1.0, defense:1.0, gambleChance:0.20, centerPriority:1.0, movement:0.7,  powerSeeking:1.0 },
+  aggressor:  { label:'Aggressor',   aggression:1.7,  expansion:0.9, defense:0.5, gambleChance:0.10, centerPriority:1.1, movement:0.4,  powerSeeking:0.3 },
+  builder:    { label:'Builder',     aggression:0.7,  expansion:1.6, defense:1.0, gambleChance:0.15, centerPriority:1.5, movement:0.4,  powerSeeking:1.2 },
+  turtle:     { label:'Turtle',      aggression:0.4,  expansion:0.7, defense:1.6, gambleChance:0.45, centerPriority:0.8, movement:0.3,  powerSeeking:1.5 },
+  runner:     { label:'Bėgikas',     aggression:0.9,  expansion:0.9, defense:0.7, gambleChance:0.15, centerPriority:1.4, movement:2.8,  powerSeeking:0.8 },
+  collector:  { label:'Kolekcionier',aggression:0.7,  expansion:1.3, defense:0.8, gambleChance:0.25, centerPriority:0.7, movement:1.0,  powerSeeking:3.0 },
+  eliminator: { label:'Eliminatorius',aggression:2.0, expansion:0.8, defense:0.4, gambleChance:0.05, centerPriority:0.5, movement:1.8,  powerSeeking:0.2 },
 };
 
 let selectedPC=2, selectedHumans=1, selectedSimGames=25;
-const enabledPowers=new Set([0,1,2,3,4]);
-const aiArchetypes=['balanced','aggressor','builder','runner']; // default mix includes runner
-const costs={buildNormal:2, buildCenter:3, move:2, attackNormal:3, attackCenter:4, attackBase:5, gamble:3, startAP:4};
+let enabledPowers=new Set([0,1,2,3,4,5,6]);
+const aiArchetypes=['balanced','collector','eliminator','turtle'];
+let powersEnabled=true;
+let autoEndTurn=false;
+
+function loadCustomPowers(){
+  try{ const s=localStorage.getItem('heksatorija_custom_powers'); if(s) JSON.parse(s).forEach(p=>ALL_POWERS.push(p)); }catch(e){}
+}
+function saveCustomPowers(){
+  try{ localStorage.setItem('heksatorija_custom_powers', JSON.stringify(ALL_POWERS.filter(p=>p.custom))); }catch(e){}
+}
+function togglePowersEnabled(on){
+  powersEnabled=on;
+  document.getElementById('powers-body').style.opacity=on?'1':'0.4';
+  document.getElementById('powers-body').style.pointerEvents=on?'':'none';
+}
+function updateCPValueVisibility(){
+  const e=document.getElementById('cp-effect').value;
+  document.getElementById('cp-val-wrap').style.display=e==='cheap_gamble'?'none':'';
+}
+function addCustomPower(){
+  const name=document.getElementById('cp-name').value.trim();
+  const icon=document.getElementById('cp-icon').value.trim()||'★';
+  const desc=document.getElementById('cp-desc').value.trim();
+  const effect=document.getElementById('cp-effect').value;
+  const value=parseInt(document.getElementById('cp-value').value)||2;
+  if(!name){alert('Įveskite galios pavadinimą!');return;}
+  if(!desc){alert('Įveskite aprašymą!');return;}
+  const id=Date.now()%1000000+100;
+  const pw={id, name, short:icon, desc, effect, custom:true, ...(effect!=='cheap_gamble'&&{value})};
+  ALL_POWERS.push(pw);
+  enabledPowers.add(id);
+  saveCustomPowers();
+  document.getElementById('cp-name').value='';
+  document.getElementById('cp-icon').value='';
+  document.getElementById('cp-desc').value='';
+  renderPowers();
+}
+function deleteCustomPower(id,e){
+  e.stopPropagation();
+  ALL_POWERS.splice(ALL_POWERS.findIndex(p=>p.id===id),1);
+  enabledPowers.delete(id);
+  saveCustomPowers();
+  renderPowers();
+}
+function maybeAutoEndTurn(p){
+  const cb=document.getElementById('auto-end-toggle');
+  if(cb && cb.checked && p.isHuman && p.ap===0 && !G.gameOver && !G.pendingPower && !G.pendingHandoff)
+    setTimeout(endTurn,300);
+}
+const costs={buildNormal:2, buildCenter:3, move:2, attackNormal:3, attackCenter:5, attackBase:5, gamble:3, startAP:5};
 const costMin={buildNormal:1, buildCenter:1, move:1, attackNormal:1, attackCenter:1, attackBase:1, gamble:1, startAP:2};
 const costMax={buildNormal:9, buildCenter:9, move:9, attackNormal:9, attackCenter:9, attackBase:12, gamble:9, startAP:12};
 const winConfig={centerVerts:6, hexCount:8};
@@ -334,8 +428,9 @@ function renderPowers(){
   ALL_POWERS.forEach(pw=>{
     const el=document.createElement('div');
     el.className='power-toggle'+(enabledPowers.has(pw.id)?' on':'');
-    el.innerHTML=`<span class="pt-icon">${pw.short}</span><span class="pt-label"><b>${pw.name}</b><div style="font-size:10px;color:var(--text-dim);margin-top:1px;">${pw.desc}</div></span><span class="pt-check">${enabledPowers.has(pw.id)?'✓':'·'}</span>`;
-    el.onclick=()=>{ if(enabledPowers.has(pw.id)) enabledPowers.delete(pw.id); else enabledPowers.add(pw.id); renderPowers(); };
+    const delBtn=pw.custom?`<button class="pt-del" title="Ištrinti" onclick="deleteCustomPower(${pw.id},event)">🗑</button>`:'';
+    el.innerHTML=`<span class="pt-icon">${pw.short}</span><span class="pt-label"><b>${pw.name}</b>${pw.custom?` <span style="font-size:9px;color:var(--purple);">[sava]</span>`:''}${pw.value!==undefined?` <span style="font-size:9px;color:var(--text-dim);">(N=${pw.value})</span>`:''}<div style="font-size:10px;color:var(--text-dim);margin-top:1px;">${pw.desc}</div></span><span class="pt-check">${enabledPowers.has(pw.id)?'✓':'·'}</span>${delBtn}`;
+    el.onclick=(e)=>{ if(e.target.closest('.pt-del')) return; if(enabledPowers.has(pw.id)) enabledPowers.delete(pw.id); else enabledPowers.add(pw.id); renderPowers(); };
     c.appendChild(el);
   });
 }
@@ -360,7 +455,7 @@ function renderArchetypes(){
   });
 }
 function adjSimGames(d){ selectedSimGames=Math.min(500,Math.max(1,selectedSimGames+d)); document.getElementById('val-simGames').textContent=selectedSimGames; }
-selectPC(2); renderPowers(); renderArchetypes(); updateHumansUI();
+loadCustomPowers(); updateCPValueVisibility(); selectPC(2); renderPowers(); renderArchetypes(); updateHumansUI();
 
 // ── HEX MATH ─────────────────────────────────────────
 function hexCorners(cx,cy,r){ const pts=[]; for(let i=0;i<6;i++){const a=Math.PI/3*i+Math.PI/6;pts.push({x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)});} return pts; }
@@ -418,6 +513,8 @@ function initGameState(opts){
       archetype: opts.archetypes[p]||'balanced',
       ap:costs.startAP, bank:0, maxBank:MAX_BANK_DEFAULT,
       alive:true, baseKey:bv.key, powers:[], shieldTurns:0,
+      staleTurns:0, lastVertCount:1,
+      threatTarget:-1, threatType:null, threatLevel:0,
       stats:{ build:0, move:0, attackNormal:0, attackBase:0, gamble:0, bank:0, gambleNet:0 }
     });
   }
@@ -470,7 +567,7 @@ function buildBoardForRealGame(names){
   const w=area.clientWidth, h=area.clientHeight;
   canvas.width=w; canvas.height=h;
   HEX_R=computeHexR(w,h);
-  G=initGameState({pc:selectedPC, humans:selectedHumans, names, powerIds:enabledPowers, archetypes:aiArchetypes, isSim:false});
+  G=initGameState({pc:selectedPC, humans:selectedHumans, names, powerIds:powersEnabled?enabledPowers:new Set(), archetypes:aiArchetypes, isSim:false});
   rebuildGeometry(w,h);
 
   if(!canvas._wired){
@@ -601,7 +698,8 @@ function applyAttack(v,p){
   } else {
     v.owner=p.id; p.stats.attackNormal++;
   }
-  if(hasPower(p,'refund')) p.ap=Math.min(p.ap+1,12);
+  if(hasPower(p,'refund')){ const rp=p.powers.find(pw=>pw.effect==='refund'); p.ap=Math.min(p.ap+(rp?.value||1),12); }
+  if(!v.isBase && hasPower(target,'counter') && target.alive){ const cp=target.powers.find(pw=>pw.effect==='counter'); target.ap=Math.min(target.ap+(cp?.value||1),12); }
   checkPowerRevealOn(v,p);
   updateConnectivity();
   return target;
@@ -633,8 +731,9 @@ function checkPowerRevealOn(v,p){
     const verts=h.vertices.map(v=>G.vByKey.get(vKey(v.x,v.y)));
     if(verts.every(u=>u&&u.owner===p.id)){
       h.powerRevealed=true; const pw=h.powerData; p.powers.push(pw);
-      if(pw.effect==='bank_bonus') p.maxBank=Math.min(p.maxBank+2,12);
-      if(pw.effect==='shield')     p.shieldTurns=2;
+      if(pw.effect==='bank_bonus') p.maxBank=Math.min(p.maxBank+(pw.value||2),12);
+      if(pw.effect==='shield')     p.shieldTurns=pw.value||2;
+      if(pw.effect==='ap_surge')   p.ap=Math.min(p.ap+(pw.value||3),12);
       if(!G.isSim){
         if(p.isHuman){ G.pendingPower={name:pw.name,desc:pw.desc}; showPowerPopup(pw); }
         log(`${p.name} gavo galią: ${pw.name}!`,'good');
@@ -670,7 +769,7 @@ function doBuildAt(v){
   applyBuild(v,p);
   log(`${p.name}: pastatė (${c} AP)`,p.isHuman?'me':'');
   G.selectedAction=null; document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  checkWin(); computeHighlights(); renderAll(); updateUI();
+  checkWin(); computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doMoveAt(v){
   const p=G.players[G.currentPlayer];
@@ -686,7 +785,7 @@ function doMoveAt(v){
   log(`${p.name}: pajudino (${costs.move} AP)`,p.isHuman?'me':'');
   G.moveSource=null; G.selectedAction=null;
   document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  checkWin(); computeHighlights(); renderAll(); updateUI();
+  checkWin(); computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doAttackAt(v){
   const p=G.players[G.currentPlayer];
@@ -702,7 +801,7 @@ function doAttackAt(v){
   if(wasBase) log(`${target.name} bazė sunaikinta!`,'warn');
   log(`${p.name}: puolė (${c} AP)`,p.isHuman?'me':'');
   G.selectedAction=null; document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  checkWin(); computeHighlights(); renderAll(); updateUI();
+  checkWin(); computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doGamble(){
   const p=G.players[G.currentPlayer];
@@ -714,7 +813,7 @@ function doGamble(){
   const tag = r.net>0?'good':(r.net<0?'warn':'me');
   log(`🎲 ${p.name}: d6=${r.roll}, gauta ${r.payout}, neto ${r.net>=0?'+':''}${r.net} AP`,tag);
   G.selectedAction=null; document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  computeHighlights(); renderAll(); updateUI();
+  computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doBank(){
   const p=G.players[G.currentPlayer];
@@ -859,8 +958,29 @@ function getHexCounts(){
   const counts=Array(G.players.length).fill(0);
   G.hexes.forEach(h=>{ if(h.id===0) return;
     const verts=h.vertices.map(v=>G.vByKey.get(vKey(v.x,v.y)));
-    if(verts.length===6 && verts[0] && verts[0].owner!==-1 && verts.every(v=>v&&v.owner===verts[0].owner)) counts[verts[0].owner]++; });
+    const owned={};
+    verts.forEach(v=>{ if(v&&v.owner!==-1) owned[v.owner]=(owned[v.owner]||0)+1; });
+    Object.entries(owned).forEach(([pid,cnt])=>{ if(cnt>=4) counts[+pid]++; });
+  });
   return counts;
+}
+function assessThreats(p){
+  const cc=getCenterOwnership(), hc=getHexCounts();
+  const alive=G.players.filter(op=>op.alive&&op.id!==p.id);
+  let maxThreat=0, threatTarget=-1, threatType=null;
+  alive.forEach(op=>{
+    const centerProg=cc[op.id]/winConfig.centerVerts;
+    const hexProg=hc[op.id]/winConfig.hexCount;
+    const threat=Math.max(centerProg, hexProg);
+    if(threat>maxThreat){
+      maxThreat=threat;
+      threatTarget=op.id;
+      threatType=centerProg>=hexProg?'center':'hex';
+    }
+  });
+  // If only one opponent remains alive, always flag them as a threat
+  if(alive.length===1 && threatTarget===-1){ threatTarget=alive[0].id; threatType='last'; maxThreat=0.5; }
+  p.threatTarget=threatTarget; p.threatType=threatType; p.threatLevel=maxThreat;
 }
 function checkWin(){
   // 1) Center vertices (configurable threshold)
@@ -901,12 +1021,18 @@ function endTurn(){
 function nextPlayer(){
   const cp=G.players[G.currentPlayer];
   if(cp.shieldTurns>0) cp.shieldTurns--;
+  // stalemate tracking: count consecutive turns with no vertex gain
+  if(!cp.isHuman){
+    const vc=G.vertices.filter(v=>v.owner===cp.id).length;
+    if(vc<=cp.lastVertCount) cp.staleTurns++; else { cp.staleTurns=0; cp.lastVertCount=vc; }
+  }
   let next=(G.currentPlayer+1)%G.players.length, tries=0;
   while(!G.players[next].alive&&tries<G.players.length){ next=(next+1)%G.players.length; tries++; }
   if(next<=G.currentPlayer) G.turnNum++;
   G.currentPlayer=next;
   const np=G.players[next];
-  const bonus=hasPower(np,'ap_bonus')?1:0;
+  const apBonusPw=np.powers.find(pw=>pw.effect==='ap_bonus');
+  const bonus=apBonusPw?(apBonusPw.value||1):0;
   np.ap=costs.startAP+bonus+np.bank; np.bank=0;
   if(bonus&&!G.isSim) log(`${np.name}: +1 AP (galia)`,'good');
   G.undoSnapshot=null;
@@ -926,9 +1052,24 @@ function nextPlayer(){
 
 // ── AI ───────────────────────────────────────────────
 function aiPickAction(p){
-  const arch=AI_ARCHETYPES[p.archetype]||AI_ARCHETYPES.balanced;
+  const baseArch=AI_ARCHETYPES[p.archetype]||AI_ARCHETYPES.balanced;
+  // stale-break: after 3+ static turns, shift strategy toward aggression+movement
+  let arch=baseArch;
+  if(p.staleTurns>=3){
+    const boost=Math.min(p.staleTurns-2, 4)*0.25; // up to +1.0 over 4 stale turns
+    arch={...baseArch,
+      aggression: Math.min(baseArch.aggression+boost*1.2, 2.5),
+      movement:   Math.min(baseArch.movement+boost*0.8,  3.0),
+      gambleChance: Math.min(baseArch.gambleChance+boost*0.1, 0.6),
+    };
+    if(!G.isSim && p.staleTurns===3) log(`${p.name} keičia strategiją (${p.staleTurns} ėjimai be progreso)!`,'warn');
+  }
   const myKeys=new Set(G.vertices.filter(v=>v.owner===p.id).map(v=>v.key));
   const candidates=[];
+
+  // threat awareness: scale bonus by how close the threat is (0 at 0%, full at 100%)
+  const tl=p.threatLevel||0;
+  const isThreat=ownerId=>ownerId===p.threatTarget;
 
   // Attacks
   G.vertices.forEach(v=>{
@@ -938,9 +1079,21 @@ function aiPickAction(p){
     if(v.isBase&&target.shieldTurns>0) return;
     const c=attackCost(v); if(p.ap<c) return;
     let score;
-    if(v.isBase){ score=200*arch.aggression - c*4; }
-    else if(v.hexIds.includes(0)){ score=60*arch.aggression*arch.centerPriority - c*2; }
-    else { score=40*arch.aggression - c*2; }
+    if(v.isBase){
+      score=200*arch.aggression - c*4;
+      // always escalate attacking the most dangerous player's base
+      if(isThreat(v.owner)) score+=60*tl;
+    } else if(v.hexIds.includes(0)){
+      score=60*arch.aggression*arch.centerPriority - c*3;
+      // if threat is winning via center, urgently contest it
+      if(isThreat(v.owner) && p.threatType==='center') score+=50*tl;
+      else if(isThreat(v.owner)) score+=20*tl;
+    } else {
+      score=40*arch.aggression - c*2;
+      // if threat is winning via hex count, strip their territory
+      if(isThreat(v.owner) && p.threatType==='hex') score+=35*tl;
+      else if(isThreat(v.owner)) score+=15*tl;
+    }
     candidates.push({type:'attack', target:v, cost:c, score});
   });
 
@@ -950,10 +1103,19 @@ function aiPickAction(p){
     if(!canBuildAt(v,p.id)) return;
     const c=buildCost(v); if(p.ap<c) return;
     let score;
-    if(v.hexIds.includes(0)){ score=50*arch.expansion*arch.centerPriority - c*2; }
-    else { score=30*arch.expansion - c*2; }
+    if(v.hexIds.includes(0)){
+      score=50*arch.expansion*arch.centerPriority - c*2;
+      // race to contest center if opponent is winning there
+      if(p.threatType==='center') score+=25*tl;
+    } else {
+      score=30*arch.expansion - c*2;
+      // expand aggressively to keep up in hex count if losing that race
+      if(p.threatType==='hex') score+=15*tl;
+    }
     const baseV=G.vByKey.get(p.baseKey);
     if(baseV){ const d=Math.hypot(v.x-baseV.x, v.y-baseV.y); if(d<HEX_R*2) score+=10*arch.defense; }
+    const nearPower=v.hexIds.some(hid=>{ const h=G.hexes[hid]; return h.hasPower&&!h.powerRevealed; });
+    if(nearPower) score+=12*(arch.powerSeeking||1.0);
     candidates.push({type:'build', target:v, cost:c, score});
   });
 
@@ -993,9 +1155,12 @@ function aiPickAction(p){
 
   if(candidates.length===0) return null;
   candidates.sort((a,b)=>b.score-a.score);
-  const top=candidates.slice(0, Math.min(3, candidates.length));
+  // stale-break: consider more candidates to avoid repeating the same move
+  const topN = p.staleTurns>=3 ? Math.min(5, candidates.length) : Math.min(3, candidates.length);
+  const top=candidates.slice(0, topN);
   if(top[0].score<0 && top[0].type!=='attack') return null;
-  return top[Math.floor(Math.random()*Math.min(top.length, 2))];
+  const pickN = p.staleTurns>=3 ? Math.min(top.length, 3) : Math.min(top.length, 2);
+  return top[Math.floor(Math.random()*pickN)];
 }
 
 function aiExecuteAction(p, act){
@@ -1021,6 +1186,7 @@ function aiExecuteAction(p, act){
 
 function aiTurnSync(p){
   if(!p.alive||G.gameOver) return;
+  assessThreats(p);
   let safety=20;
   while(safety-->0 && !G.gameOver && p.ap>0){
     const act=aiPickAction(p);
@@ -1037,6 +1203,8 @@ function aiTurnSync(p){
 function aiTurn(p){
   if(G.isSim){ aiTurnSync(p); nextPlayer(); return; }
   if(!p.alive||G.gameOver) return;
+  assessThreats(p);
+  if(p.threatTarget!==-1) log(`${p.name} stebi ${G.players[p.threatTarget].name} (${p.threatType}, ${Math.round(p.threatLevel*100)}%)`,'' );
   let steps=0, MAX=12;
   function step(){
     if(G.gameOver||steps>=MAX||p.ap<=0) return finish();
@@ -1123,7 +1291,7 @@ function runSimulationBatch(){
   function runOne(){
     if(i>=totalGames){ finishSim(aggregate); return; }
     const archs=aiArchetypes.slice(0,selectedPC);
-    G=initGameState({pc:selectedPC,humans:0,names:PLAYER_NAMES_MULTI,powerIds:enabledPowers,archetypes:archs,isSim:true});
+    G=initGameState({pc:selectedPC,humans:0,names:PLAYER_NAMES_MULTI,powerIds:powersEnabled?enabledPowers:new Set(),archetypes:archs,isSim:true});
     archs.forEach(a=>{ aggregate.archCount[a]=(aggregate.archCount[a]||0)+1; aggregate.byArch[a].games++; });
     let safetyTurns=400;
     while(!G.gameOver && safetyTurns-->0){

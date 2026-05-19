@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heksatorija — Strategy Analysis</title>
+<style>
+:root{--bg:#0d0d0f;--bg2:#13131a;--bg3:#1a1a25;--border:#2a2a3a;--gold:#c9a84c;--gold-dim:#7a6030;--text:#d4cfc7;--text-dim:#7a7570;--purple:#8e44ad;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;font-size:14px;min-height:100vh;padding:24px;}
+h1{color:var(--gold);font-size:28px;letter-spacing:.08em;margin-bottom:6px;}
+.subtitle{color:var(--text-dim);font-size:13px;margin-bottom:20px;}
+.run-btn{background:var(--purple);color:#fff;border:none;font-size:15px;font-weight:700;padding:12px 28px;border-radius:5px;cursor:pointer;letter-spacing:.05em;}
+.run-btn:hover{opacity:.85;}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;}
+#progress-area{display:none;margin-top:18px;}
+.progress-label{color:var(--text-dim);font-size:12px;margin-bottom:6px;}
+.bar-wrap{width:100%;max-width:500px;height:10px;background:var(--bg3);border-radius:5px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--purple);transition:width .15s;}
+.suite-label{color:var(--text-dim);font-size:11px;margin-top:5px;font-style:italic;}
+#results-area{margin-top:28px;}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:18px 20px;margin-bottom:18px;}
+.section h2{color:var(--gold);font-size:15px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.section h3{color:var(--text-dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:14px 0 6px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:5px 8px;text-align:left;border-bottom:1px solid var(--border);}
+th{color:var(--gold);font-size:10px;text-transform:uppercase;font-weight:600;}
+td:not(:first-child){text-align:right;font-family:monospace;}
+.good{color:#27ae60;}
+.warn{color:#e67e22;}
+.bad{color:#e74c3c;}
+.ok{color:var(--text-dim);}
+.rec-box{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:14px 16px;margin-bottom:10px;}
+.rec-box h4{color:var(--gold);font-size:12px;margin-bottom:6px;}
+.rec-box p{color:var(--text-dim);font-size:12px;line-height:1.5;}
+.code{background:#0a0a10;border:1px solid #2a2a4a;border-radius:4px;padding:10px 12px;font-family:monospace;font-size:11px;color:#a0c0f0;margin-top:8px;white-space:pre-wrap;word-break:break-all;}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border);}
+.stat-row strong{color:var(--gold);font-family:monospace;}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:700;margin-left:6px;}
+.badge.good{background:#1a3a1a;color:#27ae60;}
+.badge.warn{background:#3a2a00;color:#e67e22;}
+.badge.bad{background:#3a1a1a;color:#e74c3c;}
+.matrix-grid{display:grid;gap:1px;background:var(--border);}
+.matrix-cell{padding:5px 4px;text-align:center;font-size:11px;font-family:monospace;background:var(--bg2);}
+.matrix-header{background:var(--bg3);color:var(--gold);font-size:10px;font-weight:600;}
+</style>
+</head>
+<body>
+<h1>⬡ Heksatorija — Strategy Analysis</h1>
+<p class="subtitle">Runs ~3 300 AI-only simulations across six test suites and generates tuning recommendations for index.html.</p>
+<button class="run-btn" id="run-btn" onclick="startAnalysis()">&#9654; Run Full Analysis</button>
+
+<div id="progress-area">
+  <div class="progress-label">Running simulations…</div>
+  <div class="bar-wrap"><div class="bar-fill" id="bar-fill" style="width:0%"></div></div>
+  <div class="suite-label" id="suite-label">Initializing…</div>
+</div>
+
+<div id="results-area"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  GAME ENGINE (extracted from index.html)
+// ═══════════════════════════════════════════════════════
+
+const PLAYER_COLORS=['#e74c3c','#3498db','#2ecc71','#f39c12'];
+const PLAYER_NAMES_MULTI=['Player 1','Player 2','Player 3','Player 4'];
+const MAX_BANK_DEFAULT=6;
+
+const ALL_POWERS=[
+  {id:0, name:'+1 AP / turn',    short:'+', desc:'Each turn start get +1 AP.',    effect:'ap_bonus'},
+  {id:1, name:'Bank +2',         short:'B', desc:'Bank capacity +2.',              effect:'bank_bonus'},
+  {id:2, name:'Cheap Gamble',    short:'G', desc:'Gamble costs 1 AP less.',        effect:'cheap_gamble'},
+  {id:3, name:'Shield',          short:'S', desc:'Base immune 2 turns.',           effect:'shield'},
+  {id:4, name:'AP Refund',       short:'R', desc:'+1 AP on successful attack.',    effect:'refund'},
+];
+
+const AI_ARCHETYPES={
+  balanced:  { label:'Balanced',  aggression:1.0, expansion:1.0, defense:1.0, gambleChance:0.20, centerPriority:1.0, movement:0.7 },
+  aggressor: { label:'Aggressor', aggression:1.7, expansion:0.7, defense:0.5, gambleChance:0.10, centerPriority:0.6, movement:0.4 },
+  builder:   { label:'Builder',   aggression:0.5, expansion:1.6, defense:1.0, gambleChance:0.15, centerPriority:1.5, movement:0.4 },
+  turtle:    { label:'Turtle',    aggression:0.4, expansion:0.7, defense:1.6, gambleChance:0.45, centerPriority:0.8, movement:0.3 },
+  runner:    { label:'Runner',    aggression:0.9, expansion:0.9, defense:0.7, gambleChance:0.15, centerPriority:1.4, movement:2.8 },
+};
+
+let costs={buildNormal:2, buildCenter:3, move:2, attackNormal:3, attackCenter:4, attackBase:5, gamble:3, startAP:4};
+let winConfig={centerVerts:6, hexCount:8};
+const HEX_R=30;
+let G=null;
+
+// ── HEX MATH ─────────────────────────────────────────
+function hexCorners(cx,cy,r){
+  const pts=[];
+  for(let i=0;i<6;i++){const a=Math.PI/3*i+Math.PI/6;pts.push({x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)});}
+  return pts;
+}
+function axialToPixel(q,r,size,ox,oy){return {x:ox+size*Math.sqrt(3)*(q+r/2), y:oy+size*1.5*r};}
+function buildGrid(size,ox,oy){
+  const ax=[[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1],[2,0],[1,1],[0,2],[-1,2],[-2,2],[-2,1],[-2,0],[-1,-1],[0,-2],[1,-2],[2,-2],[2,-1]];
+  return ax.map(([q,r],i)=>{
+    const c=axialToPixel(q,r,size,ox,oy);
+    const ring=i===0?0:i<=6?1:2;
+    return {id:i,q,r,cx:c.x,cy:c.y,ring,vertices:hexCorners(c.x,c.y,size),hasPower:false,powerRevealed:false,powerData:null};
+  });
+}
+function vKey(x,y){return `${Math.round(x*10)},${Math.round(y*10)}`;}
+function buildVertices(hexes){
+  const m=new Map();
+  hexes.forEach(h=>h.vertices.forEach(v=>{
+    const k=vKey(v.x,v.y);
+    if(!m.has(k)) m.set(k,{key:k,x:v.x,y:v.y,owner:-1,isBase:false,active:false,disconnected:false,componentSize:0,connectedToBase:false,hexIds:[]});
+    const vd=m.get(k);
+    if(!vd.hexIds.includes(h.id)) vd.hexIds.push(h.id);
+  }));
+  return [...m.values()];
+}
+function buildAdjacencyMap(hexes,vertices){
+  const a=new Map(); vertices.forEach(v=>a.set(v.key,new Set()));
+  hexes.forEach(h=>{
+    const c=h.vertices.map(v=>vKey(v.x,v.y));
+    for(let i=0;i<6;i++){const x=c[i],y=c[(i+1)%6]; a.get(x).add(y); a.get(y).add(x);}
+  });
+  return a;
+}
+
+// ── GAME STATE ───────────────────────────────────────
+function initGameState(opts){
+  const ox=300, oy=300;
+  const r=HEX_R;
+  const hexes=buildGrid(r,ox,oy), vertices=buildVertices(hexes), adjMap=buildAdjacencyMap(hexes,vertices);
+  const vByKey=new Map(vertices.map(v=>[v.key,v]));
+
+  const ring2=hexes.filter(h=>h.ring===2);
+  const step=Math.floor(ring2.length/opts.pc);
+  const players=[];
+  for(let p=0;p<opts.pc;p++){
+    const h=ring2[(p*step)%ring2.length];
+    const hverts=h.vertices.map(v=>vByKey.get(vKey(v.x,v.y)));
+    let bv=hverts[0]; hverts.forEach(v=>{if(Math.hypot(v.x-ox,v.y-oy)>Math.hypot(bv.x-ox,bv.y-oy)) bv=v;});
+    bv.owner=p; bv.isBase=true; bv.active=true; bv.componentSize=1; bv.connectedToBase=true; bv.disconnected=false;
+    players.push({
+      id:p, name:PLAYER_NAMES_MULTI[p], color:PLAYER_COLORS[p],
+      isHuman:false,
+      archetype:opts.archetypes[p]||'balanced',
+      ap:costs.startAP, bank:0, maxBank:MAX_BANK_DEFAULT,
+      alive:true, baseKey:bv.key, powers:[], shieldTurns:0,
+      stats:{build:0,move:0,attackNormal:0,attackBase:0,gamble:0,bank:0,gambleNet:0}
+    });
+  }
+
+  const enabledList=ALL_POWERS.filter(pw=>opts.powerIds.has(pw.id));
+  if(enabledList.length>0){
+    const baseHexIds=new Set(); players.forEach(p=>{const bv=vByKey.get(p.baseKey); bv.hexIds.forEach(hid=>baseHexIds.add(hid));});
+    const candidates=ring2.filter(h=>!baseHexIds.has(h.id));
+    const shuffled=[...candidates].sort(()=>Math.random()-0.5);
+    const numPlace=Math.min(enabledList.length,shuffled.length);
+    for(let i=0;i<numPlace;i++){shuffled[i].hasPower=true; shuffled[i].powerData=enabledList[i%enabledList.length];}
+  }
+
+  return {hexes,vertices,adjMap,vByKey,players,
+          currentPlayer:0,turnNum:1,
+          selectedAction:null,moveSource:null,
+          pendingPower:null,pendingHandoff:false,
+          gameOver:false,winner:null,winCondition:null,
+          ox,oy,isSim:true,undoSnapshot:null};
+}
+
+// ── CONNECTIVITY ─────────────────────────────────────
+function updateConnectivity(){
+  G.players.forEach(p=>{
+    if(!p.alive) return;
+    const visited=new Set();
+    const myVerts=G.vertices.filter(v=>v.owner===p.id);
+    myVerts.forEach(start=>{
+      if(visited.has(start.key)) return;
+      const comp=[start]; visited.add(start.key); const q=[start];
+      while(q.length){
+        const cur=q.shift();
+        (G.adjMap.get(cur.key)||new Set()).forEach(nb=>{
+          if(!visited.has(nb)){
+            const nbV=G.vByKey.get(nb);
+            if(nbV&&nbV.owner===p.id){visited.add(nb);comp.push(nbV);q.push(nbV);}
+          }
+        });
+      }
+      const size=comp.length, hasBase=comp.some(v=>v.isBase);
+      comp.forEach(v=>{v.componentSize=size;v.connectedToBase=hasBase;v.active=v.isBase||size>=2;v.disconnected=!v.active;});
+    });
+  });
+}
+
+// ── REACHABILITY ─────────────────────────────────────
+function canBuildAt(v,pid){
+  if(v.owner!==-1) return false;
+  return [...(G.adjMap.get(v.key)||[])].some(k=>{const u=G.vByKey.get(k);return u&&u.owner===pid&&u.active;});
+}
+function moveReach(source,pid){
+  const visited=new Set([source.key]); let frontier=[source.key];
+  for(let s=0;s<2;s++){
+    const next=[];
+    frontier.forEach(k=>{
+      (G.adjMap.get(k)||new Set()).forEach(nb=>{
+        if(!visited.has(nb)){
+          const nbV=G.vByKey.get(nb);
+          if(nbV&&(nbV.owner===-1||nbV.owner===pid)){visited.add(nb);next.push(nb);}
+        }
+      });
+    });
+    frontier=next;
+  }
+  visited.delete(source.key);
+  return [...visited].map(k=>G.vByKey.get(k)).filter(v=>v&&v.owner===-1);
+}
+function buildCost(v){return v.hexIds.includes(0)?costs.buildCenter:costs.buildNormal;}
+function attackCost(v){if(v.isBase) return costs.attackBase; if(v.hexIds.includes(0)) return costs.attackCenter; return costs.attackNormal;}
+function hasPower(p,e){return p.powers.some(pw=>pw.effect===e);}
+
+// ── PURE ACTIONS ─────────────────────────────────────
+function applyBuild(v,p){
+  v.owner=p.id; p.ap-=buildCost(v); p.stats.build++;
+  checkPowerRevealOn(v,p); updateConnectivity();
+}
+function applyMove(from,to,p){
+  from.owner=-1; to.owner=p.id; p.ap-=costs.move; p.stats.move++;
+  checkPowerRevealOn(to,p); updateConnectivity();
+}
+function applyAttack(v,p){
+  const c=attackCost(v); p.ap-=c;
+  const target=G.players[v.owner];
+  if(v.isBase){
+    target.alive=false;
+    G.vertices.filter(u=>u.owner===target.id).forEach(u=>{u.owner=-1;u.isBase=false;});
+    v.owner=p.id; v.isBase=false; p.stats.attackBase++;
+  } else {
+    v.owner=p.id; p.stats.attackNormal++;
+  }
+  if(hasPower(p,'refund')) p.ap=Math.min(p.ap+1,12);
+  checkPowerRevealOn(v,p); updateConnectivity();
+  return target;
+}
+function applyGamble(p){
+  const c=hasPower(p,'cheap_gamble')?Math.max(1,costs.gamble-1):costs.gamble;
+  p.ap-=c; p.stats.gamble++;
+  const roll=Math.floor(Math.random()*6)+1;
+  let payout;
+  if(roll===1) payout=0;
+  else if(roll===2) payout=1;
+  else if(roll===3||roll===4) payout=c+1;
+  else if(roll===5) payout=c+2;
+  else payout=2*c+1;
+  p.ap=Math.max(0,p.ap+payout);
+  const net=payout-c;
+  p.stats.gambleNet+=net;
+  return {roll,payout,net,cost:c};
+}
+function applyBank(p,amount){
+  amount=Math.min(amount,p.maxBank-p.bank,p.ap);
+  p.bank+=amount; p.ap-=amount; p.stats.bank+=amount;
+  return amount;
+}
+function checkPowerRevealOn(v,p){
+  v.hexIds.forEach(hid=>{
+    const h=G.hexes[hid];
+    if(!h.hasPower||h.powerRevealed) return;
+    const verts=h.vertices.map(v=>G.vByKey.get(vKey(v.x,v.y)));
+    if(verts.every(u=>u&&u.owner===p.id)){
+      h.powerRevealed=true; const pw=h.powerData; p.powers.push(pw);
+      if(pw.effect==='bank_bonus') p.maxBank=Math.min(p.maxBank+2,12);
+      if(pw.effect==='shield') p.shieldTurns=2;
+    }
+  });
+}
+
+// ── WIN CHECK ────────────────────────────────────────
+function getCenterOwnership(){
+  const cv=G.hexes[0].vertices.map(v=>G.vByKey.get(vKey(v.x,v.y)));
+  const counts=Array(G.players.length).fill(0);
+  cv.forEach(v=>{if(v&&v.owner!==-1) counts[v.owner]++;});
+  return counts;
+}
+function getHexCounts(){
+  const counts=Array(G.players.length).fill(0);
+  G.hexes.forEach(h=>{
+    if(h.id===0) return;
+    const verts=h.vertices.map(v=>G.vByKey.get(vKey(v.x,v.y)));
+    if(verts.length===6&&verts[0]&&verts[0].owner!==-1&&verts.every(v=>v&&v.owner===verts[0].owner)) counts[verts[0].owner]++;
+  });
+  return counts;
+}
+function checkWin(){
+  const cc=getCenterOwnership();
+  for(let i=0;i<cc.length;i++){
+    if(cc[i]>=winConfig.centerVerts){endGame(G.players[i],'Center Control'); return;}
+  }
+  const alive=G.players.filter(p=>p.alive);
+  if(alive.length===1){endGame(alive[0],'Last Standing'); return;}
+  const hc=getHexCounts();
+  for(let i=0;i<G.players.length;i++){
+    if(!G.players[i].alive) continue;
+    if(hc[i]>=winConfig.hexCount){endGame(G.players[i],'Territory'); return;}
+  }
+}
+function endGame(winner,condShort){
+  if(G.gameOver) return;
+  G.gameOver=true; G.winner=winner; G.winCondition=condShort;
+}
+
+// ── TURN MANAGEMENT ──────────────────────────────────
+function nextPlayer(){
+  const cp=G.players[G.currentPlayer];
+  if(cp.shieldTurns>0) cp.shieldTurns--;
+  let next=(G.currentPlayer+1)%G.players.length, tries=0;
+  while(!G.players[next].alive&&tries<G.players.length){next=(next+1)%G.players.length; tries++;}
+  if(next<=G.currentPlayer) G.turnNum++;
+  G.currentPlayer=next;
+  const np=G.players[next];
+  const bonus=hasPower(np,'ap_bonus')?1:0;
+  np.ap=costs.startAP+bonus+np.bank; np.bank=0;
+  G.undoSnapshot=null;
+}
+
+// ── AI ───────────────────────────────────────────────
+function aiPickAction(p){
+  const arch=AI_ARCHETYPES[p.archetype]||AI_ARCHETYPES.balanced;
+  const myKeys=new Set(G.vertices.filter(v=>v.owner===p.id).map(v=>v.key));
+  const candidates=[];
+
+  G.vertices.forEach(v=>{
+    if(v.owner===-1||v.owner===p.id) return;
+    if(![...(G.adjMap.get(v.key)||[])].some(k=>myKeys.has(k))) return;
+    const target=G.players[v.owner];
+    if(v.isBase&&target.shieldTurns>0) return;
+    const c=attackCost(v); if(p.ap<c) return;
+    let score;
+    if(v.isBase){score=200*arch.aggression-c*4;}
+    else if(v.hexIds.includes(0)){score=60*arch.aggression*arch.centerPriority-c*2;}
+    else{score=40*arch.aggression-c*2;}
+    candidates.push({type:'attack',target:v,cost:c,score});
+  });
+
+  G.vertices.forEach(v=>{
+    if(v.owner!==-1) return;
+    if(!canBuildAt(v,p.id)) return;
+    const c=buildCost(v); if(p.ap<c) return;
+    let score;
+    if(v.hexIds.includes(0)){score=50*arch.expansion*arch.centerPriority-c*2;}
+    else{score=30*arch.expansion-c*2;}
+    const baseV=G.vByKey.get(p.baseKey);
+    if(baseV){const d=Math.hypot(v.x-baseV.x,v.y-baseV.y); if(d<HEX_R*2) score+=10*arch.defense;}
+    candidates.push({type:'build',target:v,cost:c,score});
+  });
+
+  if(p.ap>=costs.move){
+    const myMoveable=G.vertices.filter(v=>v.owner===p.id&&!v.isBase);
+    const hasIsolated=myMoveable.some(v=>!v.active);
+    if(p.archetype==='runner'||hasIsolated){
+      let generated=0; const cap=40;
+      for(const src of myMoveable){
+        if(generated>=cap) break;
+        const targets=moveReach(src,p.id);
+        for(const tgt of targets){
+          if(generated>=cap) break;
+          const tgtN=[...(G.adjMap.get(tgt.key)||[])];
+          const adjFriend=tgtN.filter(k=>k!==src.key&&G.vByKey.get(k)?.owner===p.id).length;
+          const adjEnemy=tgtN.filter(k=>{const u=G.vByKey.get(k);return u&&u.owner!==-1&&u.owner!==p.id;}).length;
+          const srcWasIsolated=!src.active;
+          let score=8*arch.movement;
+          score+=adjFriend*6*arch.movement;
+          if(srcWasIsolated&&adjFriend>=1) score+=30*arch.movement;
+          if(tgt.hexIds.includes(0)) score+=15*arch.centerPriority;
+          score+=adjEnemy*10*arch.aggression;
+          score-=costs.move*2;
+          candidates.push({type:'move',source:src,target:tgt,cost:costs.move,score});
+          generated++;
+        }
+      }
+    }
+  }
+
+  const gambleCost=hasPower(p,'cheap_gamble')?Math.max(1,costs.gamble-1):costs.gamble;
+  if(p.ap>=gambleCost&&Math.random()<arch.gambleChance){
+    candidates.push({type:'gamble',target:null,cost:gambleCost,score:25*arch.gambleChance+(p.ap>8?10:0)});
+  }
+
+  if(candidates.length===0) return null;
+  candidates.sort((a,b)=>b.score-a.score);
+  const top=candidates.slice(0,Math.min(3,candidates.length));
+  if(top[0].score<0&&top[0].type!=='attack') return null;
+  return top[Math.floor(Math.random()*Math.min(top.length,2))];
+}
+
+function aiExecuteAction(p,act){
+  if(act.type==='attack'){applyAttack(act.target,p);}
+  else if(act.type==='build'){applyBuild(act.target,p);}
+  else if(act.type==='move'){applyMove(act.source,act.target,p);}
+  else if(act.type==='gamble'){applyGamble(p);}
+  checkWin();
+}
+
+function aiTurnSync(p){
+  if(!p.alive||G.gameOver) return;
+  let safety=20;
+  while(safety-->0&&!G.gameOver&&p.ap>0){
+    const act=aiPickAction(p);
+    if(!act) break;
+    aiExecuteAction(p,act);
+  }
+  if(!G.gameOver){
+    const put=Math.min(p.ap,p.maxBank-p.bank);
+    if(put>0){p.bank+=put;p.ap-=put;p.stats.bank+=put;}
+    p.ap=0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  BATCH RUNNER
+// ═══════════════════════════════════════════════════════
+
+function runOneGame(archetypes, costsOverride={}, winOverride={}, powerIds=new Set()){
+  // Apply overrides
+  const savedCosts={...costs};
+  const savedWin={...winConfig};
+  Object.assign(costs, costsOverride);
+  Object.assign(winConfig, winOverride);
+
+  const pc=archetypes.length;
+  G=initGameState({pc, humans:0, names:PLAYER_NAMES_MULTI, powerIds, archetypes, isSim:true});
+
+  let safetyTurns=400;
+  while(!G.gameOver&&safetyTurns-->0){
+    const p=G.players[G.currentPlayer];
+    if(!p.alive){nextPlayer();continue;}
+    aiTurnSync(p);
+    if(!G.gameOver) nextPlayer();
+  }
+
+  const result={
+    finished:G.gameOver,
+    turns:G.turnNum,
+    winner:G.winner?G.winner.archetype:null,
+    winCondition:G.winCondition,
+    players:G.players.map(p=>({archetype:p.archetype,stats:{...p.stats}}))
+  };
+
+  // Restore
+  Object.assign(costs, savedCosts);
+  Object.assign(winConfig, savedWin);
+
+  return result;
+}
+
+function runBatch(archetypes, numGames, costsOverride={}, winOverride={}, powerIds=new Set()){
+  const games=[];
+  let totalTurns=0, unfinished=0;
+  const byArch={};
+  const winConditions={};
+
+  archetypes.forEach(a=>{
+    if(!byArch[a]) byArch[a]={wins:0,games:0,gamble:0,gambleNet:0,build:0,move:0,attackNormal:0,attackBase:0,bank:0};
+  });
+
+  for(let i=0;i<numGames;i++){
+    const r=runOneGame(archetypes, costsOverride, winOverride, powerIds);
+    games.push(r);
+    totalTurns+=r.turns;
+    if(!r.finished) unfinished++;
+    if(r.winner){
+      if(!byArch[r.winner]) byArch[r.winner]={wins:0,games:0,gamble:0,gambleNet:0,build:0,move:0,attackNormal:0,attackBase:0,bank:0};
+      byArch[r.winner].wins++;
+      winConditions[r.winCondition]=(winConditions[r.winCondition]||0)+1;
+    }
+    r.players.forEach(p=>{
+      if(!byArch[p.archetype]) byArch[p.archetype]={wins:0,games:0,gamble:0,gambleNet:0,build:0,move:0,attackNormal:0,attackBase:0,bank:0};
+      byArch[p.archetype].games++;
+      byArch[p.archetype].gamble+=p.stats.gamble;
+      byArch[p.archetype].gambleNet+=p.stats.gambleNet;
+      byArch[p.archetype].build+=p.stats.build;
+      byArch[p.archetype].move+=p.stats.move;
+      byArch[p.archetype].attackNormal+=p.stats.attackNormal;
+      byArch[p.archetype].attackBase+=p.stats.attackBase;
+      byArch[p.archetype].bank+=p.stats.bank;
+    });
+  }
+
+  return {
+    games, avgTurns:totalTurns/Math.max(1,numGames),
+    unfinished, byArch, winConditions
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  ANALYSIS RUNNER
+// ═══════════════════════════════════════════════════════
+
+const ARCHS=Object.keys(AI_ARCHETYPES); // balanced,aggressor,builder,turtle,runner
+const N=100;
+
+let analysisResults=null;
+
+function startAnalysis(){
+  document.getElementById('run-btn').disabled=true;
+  document.getElementById('progress-area').style.display='block';
+  document.getElementById('results-area').innerHTML='';
+
+  // Use setTimeout slices so the browser can update the progress bar
+  // We'll run each suite in a separate async-like chunk
+  const suites=[];
+  let totalSuites=0;
+
+  // Suite 1: Archetype 1v1 matrix — all 10 pairs
+  const pairs=[];
+  for(let i=0;i<ARCHS.length;i++) for(let j=i+1;j<ARCHS.length;j++) pairs.push([ARCHS[i],ARCHS[j]]);
+  // pairs has 10 items
+  suites.push({name:'1. Archetype 1v1 Matrix', key:'matrix', run:()=>{
+    const results={};
+    pairs.forEach(([a,b])=>{
+      const key=`${a}_vs_${b}`;
+      results[key]=runBatch([a,b],N,{},{},new Set());
+    });
+    return results;
+  }});
+
+  // Suite 2: Player count 2P/3P/4P balanced
+  suites.push({name:'2. Player Count (balanced)', key:'playerCount', run:()=>{
+    const r2=runBatch(['balanced','balanced'],N,{},{},new Set());
+    const r3=runBatch(['balanced','balanced','balanced'],N,{},{},new Set());
+    const r4=runBatch(['balanced','balanced','balanced','balanced'],N,{},{},new Set());
+    return {2:r2, 3:r3, 4:r4};
+  }});
+
+  // Suite 3: Starting AP sweep 2,3,4,5,6 with balanced 2P
+  suites.push({name:'3. Starting AP Sweep', key:'startAP', run:()=>{
+    const results={};
+    [2,3,4,5,6].forEach(ap=>{
+      results[ap]=runBatch(['balanced','balanced'],N,{startAP:ap},{},new Set());
+    });
+    return results;
+  }});
+
+  // Suite 4: Win condition sweep centerVerts in {4,5,6} x hexCount in {6,8,10}
+  suites.push({name:'4. Win Condition Sweep', key:'winConditions', run:()=>{
+    const results={};
+    [4,5,6].forEach(cv=>{
+      [6,8,10].forEach(hc=>{
+        const key=`cv${cv}_hc${hc}`;
+        results[key]=runBatch(['balanced','balanced'],N,{},{centerVerts:cv,hexCount:hc},new Set());
+      });
+    });
+    return results;
+  }});
+
+  // Suite 5: Gamble cost sweep 2,3,4,5 with turtle vs balanced
+  suites.push({name:'5. Gamble Cost Sweep', key:'gambleCost', run:()=>{
+    const results={};
+    [2,3,4,5].forEach(gc=>{
+      results[gc]=runBatch(['turtle','balanced'],N,{gamble:gc},{},new Set());
+    });
+    return results;
+  }});
+
+  // Suite 6: Powers on/off balanced 2P
+  suites.push({name:'6. Powers On vs Off', key:'powers', run:()=>{
+    const off=runBatch(['balanced','balanced'],N,{},{},new Set());
+    const on=runBatch(['balanced','balanced'],N,{},{},new Set([0,1,2,3,4]));
+    return {off, on};
+  }});
+
+  totalSuites=suites.length;
+  const allData={};
+  let idx=0;
+
+  function runNext(){
+    if(idx>=suites.length){
+      finishAnalysis(allData);
+      return;
+    }
+    const suite=suites[idx];
+    setSuiteLabel(suite.name, idx, totalSuites);
+    // Run in next tick
+    setTimeout(()=>{
+      allData[suite.key]=suite.run();
+      idx++;
+      setProgress((idx/totalSuites)*100);
+      runNext();
+    }, 10);
+  }
+
+  runNext();
+}
+
+function setSuiteLabel(name, idx, total){
+  document.getElementById('suite-label').textContent=`Suite ${idx+1}/${total}: ${name}`;
+}
+function setProgress(pct){
+  document.getElementById('bar-fill').style.width=pct+'%';
+}
+
+function finishAnalysis(data){
+  document.getElementById('suite-label').textContent='Complete! Generating report…';
+  setProgress(100);
+
+  window.ANALYSIS_RESULTS=buildSerializable(data);
+  renderResults(data);
+
+  document.getElementById('run-btn').disabled=false;
+  document.getElementById('run-btn').textContent='&#9654; Re-run Analysis';
+}
+
+function buildSerializable(data){
+  // Produce a JSON-safe summary
+  function batchSummary(b){
+    return {
+      avgTurns:b.avgTurns,
+      unfinished:b.unfinished,
+      unfinishedPct:b.unfinished/Math.max(1,b.games?b.games.length:100)*100,
+      byArch:Object.fromEntries(Object.entries(b.byArch).map(([k,v])=>[k,{
+        wins:v.wins, games:v.games,
+        winRate:v.games>0?v.wins/v.games:0,
+        gamble:v.gamble, gambleNet:v.gambleNet,
+        build:v.build, move:v.move,
+        attackNormal:v.attackNormal, attackBase:v.attackBase,
+        bank:v.bank
+      }])),
+      winConditions:b.winConditions
+    };
+  }
+
+  const out={};
+
+  // matrix
+  out.matrix={};
+  Object.entries(data.matrix).forEach(([k,v])=>out.matrix[k]=batchSummary(v));
+
+  // playerCount
+  out.playerCount={};
+  Object.entries(data.playerCount).forEach(([k,v])=>out.playerCount[k]=batchSummary(v));
+
+  // startAP
+  out.startAP={};
+  Object.entries(data.startAP).forEach(([k,v])=>out.startAP[k]=batchSummary(v));
+
+  // winConditions
+  out.winCondSweep={};
+  Object.entries(data.winConditions).forEach(([k,v])=>out.winCondSweep[k]=batchSummary(v));
+
+  // gambleCost
+  out.gambleCost={};
+  Object.entries(data.gambleCost).forEach(([k,v])=>out.gambleCost[k]=batchSummary(v));
+
+  // powers
+  out.powers={
+    off:batchSummary(data.powers.off),
+    on:batchSummary(data.powers.on)
+  };
+
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDERING
+// ═══════════════════════════════════════════════════════
+
+function turnsClass(t){
+  if(t>=12&&t<=25) return 'good';
+  if(t<10||t>35) return 'bad';
+  return 'warn';
+}
+function pctClass(winRate1, winRate2){
+  // rate1 vs rate2, where rate1 is one player in 2P game
+  const gap=Math.abs(winRate1-winRate2)*100;
+  if(gap>30) return 'bad';
+  if(gap>20) return 'warn';
+  return 'good';
+}
+function unfinishedClass(n, total){
+  const pct=n/Math.max(1,total)*100;
+  if(pct>20) return 'bad';
+  if(pct>10) return 'warn';
+  return 'good';
+}
+function fmtPct(num, denom){return denom>0?(num/denom*100).toFixed(1)+'%':'—';}
+function fmtF(x,d=1){return x.toFixed(d);}
+
+function renderResults(data){
+  const area=document.getElementById('results-area');
+  area.innerHTML='';
+
+  area.appendChild(renderSection1(data.matrix));
+  area.appendChild(renderSection2(data.playerCount));
+  area.appendChild(renderSection3(data.startAP));
+  area.appendChild(renderSection4(data.winConditions));
+  area.appendChild(renderSection5(data.gambleCost));
+  area.appendChild(renderSection6(data.powers));
+  area.appendChild(renderRecommendations(data));
+}
+
+function el(tag, attrs={}, ...children){
+  const e=document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v])=>{
+    if(k==='className') e.className=v;
+    else if(k==='innerHTML') e.innerHTML=v;
+    else if(k==='style') e.style.cssText=v;
+    else e.setAttribute(k,v);
+  });
+  children.forEach(c=>{if(c instanceof Node) e.appendChild(c); else if(c!=null) e.appendChild(document.createTextNode(String(c)));});
+  return e;
+}
+function sec(title){const s=document.createElement('div');s.className='section';s.innerHTML=`<h2>${title}</h2>`;return s;}
+
+function renderSection1(matrix){
+  const s=sec('1. Archetype 1v1 Win Matrix');
+
+  // Build win-rate table: rows = player A archetype, cols = player B archetype
+  const winRates={}; // winRates[a][b] = a's win% when facing b
+  ARCHS.forEach(a=>{winRates[a]={};ARCHS.forEach(b=>{winRates[a][b]=null;});});
+
+  Object.entries(matrix).forEach(([key,batch])=>{
+    const [a,b]=key.split('_vs_');
+    const aGames=batch.byArch[a]||{wins:0,games:0};
+    const bGames=batch.byArch[b]||{wins:0,games:0};
+    const total=batch.games.length;
+    winRates[a][b]=aGames.games>0?aGames.wins/aGames.games:0;
+    winRates[b][a]=bGames.games>0?bGames.wins/bGames.games:0;
+  });
+
+  // Matrix header
+  const grid=document.createElement('div');
+  grid.style.overflowX='auto';
+  let html='<table><thead><tr><th>A \\ B</th>';
+  ARCHS.forEach(b=>html+=`<th>${AI_ARCHETYPES[b].label}</th>`);
+  html+='<th>Avg Win%</th></tr></thead><tbody>';
+
+  const archAvg={};
+  ARCHS.forEach(a=>{
+    const vals=ARCHS.filter(b=>b!==a&&winRates[a][b]!==null).map(b=>winRates[a][b]);
+    archAvg[a]=vals.length>0?vals.reduce((s,v)=>s+v,0)/vals.length:0;
+  });
+
+  ARCHS.forEach(a=>{
+    html+=`<tr><td style="color:var(--gold);font-weight:600;">${AI_ARCHETYPES[a].label}</td>`;
+    ARCHS.forEach(b=>{
+      if(a===b){html+=`<td style="color:var(--text-dim);">—</td>`;}
+      else{
+        const wr=winRates[a][b];
+        let cls='ok';
+        if(wr>=0.60) cls='good';
+        else if(wr<=0.35) cls='bad';
+        else if(wr>=0.53||wr<=0.43) cls='warn';
+        html+=`<td class="${cls}">${wr!==null?(wr*100).toFixed(0)+'%':'—'}</td>`;
+      }
+    });
+    const avg=archAvg[a];
+    let avgCls='ok';
+    if(avg>=0.55) avgCls='good'; else if(avg<=0.38) avgCls='bad'; else if(avg>=0.50||avg<=0.42) avgCls='warn';
+    html+=`<td class="${avgCls}" style="font-weight:600;">${(avg*100).toFixed(1)}%</td></tr>`;
+  });
+  html+='</tbody></table>';
+  grid.innerHTML=html;
+  s.appendChild(grid);
+
+  // Also show avg turns per pair
+  s.appendChild(document.createElement('div')).className='section-spacer';
+  const h3=document.createElement('h3'); h3.textContent='Avg Turns per Matchup'; s.appendChild(h3);
+
+  let t2='<table><thead><tr><th>Matchup</th><th>Avg Turns</th><th>Unfinished%</th><th>Win Conditions</th></tr></thead><tbody>';
+  Object.entries(matrix).forEach(([key,batch])=>{
+    const tc=turnsClass(batch.avgTurns);
+    const total=N;
+    const ufpct=(batch.unfinished/total*100).toFixed(0)+'%';
+    const ufcls=unfinishedClass(batch.unfinished,total);
+    const wcs=Object.entries(batch.winConditions).map(([k,v])=>`${k}:${v}`).join(', ')||'—';
+    const [a,b]=key.split('_vs_');
+    t2+=`<tr><td>${AI_ARCHETYPES[a].label} vs ${AI_ARCHETYPES[b].label}</td><td class="${tc}">${batch.avgTurns.toFixed(1)}</td><td class="${ufcls}">${ufpct}</td><td style="font-size:10px;text-align:left;">${wcs}</td></tr>`;
+  });
+  t2+='</tbody></table>';
+  const t2el=document.createElement('div'); t2el.innerHTML=t2; s.appendChild(t2el);
+
+  return s;
+}
+
+function renderSection2(pc){
+  const s=sec('2. Player Count (Balanced AI)');
+  let html='<table><thead><tr><th>Players</th><th>Avg Turns</th><th>Unfinished</th><th>Win Conditions</th></tr></thead><tbody>';
+  [2,3,4].forEach(n=>{
+    const b=pc[n];
+    const tc=turnsClass(b.avgTurns);
+    const ufpct=(b.unfinished/N*100).toFixed(0)+'%';
+    const ufcls=unfinishedClass(b.unfinished,N);
+    const wcs=Object.entries(b.winConditions).map(([k,v])=>`${k}:${v}`).join(', ')||'—';
+    html+=`<tr><td>${n}P</td><td class="${tc}">${b.avgTurns.toFixed(1)}</td><td class="${ufcls}">${ufpct}</td><td style="font-size:10px;text-align:left;">${wcs}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  s.innerHTML+=html;
+  return s;
+}
+
+function renderSection3(startAP){
+  const s=sec('3. Starting AP Sweep (Balanced 2P)');
+  let html='<table><thead><tr><th>Start AP</th><th>Avg Turns</th><th>Unfinished</th><th>Assessment</th></tr></thead><tbody>';
+  [2,3,4,5,6].forEach(ap=>{
+    const b=startAP[ap];
+    const tc=turnsClass(b.avgTurns);
+    const ufpct=(b.unfinished/N*100).toFixed(0)+'%';
+    const ufcls=unfinishedClass(b.unfinished,N);
+    let assess='';
+    if(b.avgTurns>=12&&b.avgTurns<=25&&b.unfinished/N<0.10) assess='<span class="good">Good range</span>';
+    else if(b.avgTurns<10) assess='<span class="bad">Too fast</span>';
+    else if(b.avgTurns>35||b.unfinished/N>0.20) assess='<span class="bad">Too slow/stalls</span>';
+    else assess='<span class="warn">Marginal</span>';
+    html+=`<tr><td>${ap}${ap===4?' (default)':''}</td><td class="${tc}">${b.avgTurns.toFixed(1)}</td><td class="${ufcls}">${ufpct}</td><td>${assess}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  s.innerHTML+=html;
+  return s;
+}
+
+function renderSection4(winCond){
+  const s=sec('4. Win Condition Sweep (Balanced 2P)');
+  let html='<table><thead><tr><th>centerVerts / hexCount</th><th>Avg Turns</th><th>Unfinished%</th><th>Assessment</th></tr></thead><tbody>';
+  [4,5,6].forEach(cv=>{
+    [6,8,10].forEach(hc=>{
+      const key=`cv${cv}_hc${hc}`;
+      const b=winCond[key];
+      const tc=turnsClass(b.avgTurns);
+      const ufpct=(b.unfinished/N*100).toFixed(0)+'%';
+      const ufcls=unfinishedClass(b.unfinished,N);
+      const isDefault=cv===6&&hc===8;
+      let assess='';
+      if(b.avgTurns>=14&&b.avgTurns<=22&&b.unfinished/N<0.05) assess='<span class="good">Ideal</span>';
+      else if(b.avgTurns>=12&&b.avgTurns<=25&&b.unfinished/N<0.10) assess='<span class="warn">Good</span>';
+      else if(b.unfinished/N>0.15) assess='<span class="bad">Too many stalls</span>';
+      else assess='<span class="ok">Acceptable</span>';
+      html+=`<tr><td>${cv} / ${hc}${isDefault?' (default)':''}</td><td class="${tc}">${b.avgTurns.toFixed(1)}</td><td class="${ufcls}">${ufpct}</td><td>${assess}</td></tr>`;
+    });
+  });
+  html+='</tbody></table>';
+  s.innerHTML+=html;
+  return s;
+}
+
+function renderSection5(gamble){
+  const s=sec('5. Gamble Cost Sweep (Turtle vs Balanced 2P)');
+  let html='<table><thead><tr><th>Gamble Cost</th><th>Avg Turns</th><th>Unfinished%</th><th>Turtle Win%</th><th>Balanced Win%</th><th>Turtle Avg Gambles</th><th>Turtle GambleNet/game</th></tr></thead><tbody>';
+  [2,3,4,5].forEach(gc=>{
+    const b=gamble[gc];
+    const tc=turnsClass(b.avgTurns);
+    const ufpct=(b.unfinished/N*100).toFixed(0)+'%';
+    const ufcls=unfinishedClass(b.unfinished,N);
+    const tData=b.byArch['turtle']||{wins:0,games:0,gamble:0,gambleNet:0};
+    const bData=b.byArch['balanced']||{wins:0,games:0};
+    const tWin=fmtPct(tData.wins,tData.games);
+    const bWin=fmtPct(bData.wins,bData.games);
+    const tWr=tData.games>0?tData.wins/tData.games:0;
+    const trCls=tWr>0.60?'bad':(tWr>0.55?'warn':'good');
+    const avgGamble=tData.games>0?(tData.gamble/tData.games).toFixed(1):'—';
+    const avgGNet=tData.games>0?(tData.gambleNet/tData.games).toFixed(1):'—';
+    html+=`<tr><td>${gc}${gc===3?' (default)':''}</td><td class="${tc}">${b.avgTurns.toFixed(1)}</td><td class="${ufcls}">${ufpct}</td><td class="${trCls}">${tWin}</td><td>${bWin}</td><td>${avgGamble}</td><td>${avgGNet}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  s.innerHTML+=html;
+  return s;
+}
+
+function renderSection6(powers){
+  const s=sec('6. Powers On vs Off (Balanced 2P)');
+  let html='<table><thead><tr><th>Configuration</th><th>Avg Turns</th><th>Unfinished%</th><th>Win Conditions</th></tr></thead><tbody>';
+  [['off','Powers Disabled'],['on','All 5 Powers Enabled']].forEach(([key,label])=>{
+    const b=powers[key];
+    const tc=turnsClass(b.avgTurns);
+    const ufpct=(b.unfinished/N*100).toFixed(0)+'%';
+    const ufcls=unfinishedClass(b.unfinished,N);
+    const wcs=Object.entries(b.winConditions).map(([k,v])=>`${k}:${v}`).join(', ')||'—';
+    html+=`<tr><td>${label}</td><td class="${tc}">${b.avgTurns.toFixed(1)}</td><td class="${ufcls}">${ufpct}</td><td style="font-size:10px;text-align:left;">${wcs}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  s.innerHTML+=html;
+  return s;
+}
+
+function renderRecommendations(data){
+  const s=sec('Recommendations for index.html');
+  const recs=[];
+
+  // 1. Is default AP=4 giving 12-25 avg turns?
+  const ap4=data.startAP[4];
+  if(ap4.avgTurns>=12&&ap4.avgTurns<=25&&ap4.unfinished/N<0.10){
+    recs.push({
+      title:'Starting AP = 4 is Good',
+      body:`Default AP=4 yields ${ap4.avgTurns.toFixed(1)} avg turns with ${(ap4.unfinished/N*100).toFixed(0)}% unfinished — within the ideal 12-25 turn window. No change needed.`,
+      code:null,
+      type:'good'
+    });
+  } else {
+    // Find best AP
+    let bestAP=4, bestDiff=999;
+    [2,3,4,5,6].forEach(ap=>{
+      const b=data.startAP[ap];
+      const diff=Math.abs(b.avgTurns-18)+b.unfinished/N*50;
+      if(diff<bestDiff){bestDiff=diff;bestAP=ap;}
+    });
+    const bb=data.startAP[bestAP];
+    recs.push({
+      title:`Adjust Starting AP: ${bestAP} recommended (currently 4)`,
+      body:`AP=4 gives ${ap4.avgTurns.toFixed(1)} avg turns (${(ap4.unfinished/N*100).toFixed(0)}% stalls). AP=${bestAP} gives ${bb.avgTurns.toFixed(1)} avg turns with ${(bb.unfinished/N*100).toFixed(0)}% stalls — closer to the 12-25 sweet spot.`,
+      code:`// In index.html, change the costs default:\nconst costs={buildNormal:2, buildCenter:3, move:2, attackNormal:3,\n  attackCenter:4, attackBase:5, gamble:3, startAP:${bestAP}};`,
+      type:'warn'
+    });
+  }
+
+  // 2. Strongest / weakest archetype overall (by avg win rate across all matchups)
+  const archOverall={};
+  ARCHS.forEach(a=>{archOverall[a]={wins:0,games:0};});
+  Object.values(data.matrix).forEach(batch=>{
+    Object.entries(batch.byArch).forEach(([a,v])=>{
+      if(!archOverall[a]) archOverall[a]={wins:0,games:0};
+      archOverall[a].wins+=v.wins;
+      archOverall[a].games+=v.games;
+    });
+  });
+  let strongest=ARCHS[0], weakest=ARCHS[0];
+  ARCHS.forEach(a=>{
+    const wrA=archOverall[a].games>0?archOverall[a].wins/archOverall[a].games:0;
+    const wrS=archOverall[strongest].games>0?archOverall[strongest].wins/archOverall[strongest].games:0;
+    const wrW=archOverall[weakest].games>0?archOverall[weakest].wins/archOverall[weakest].games:0;
+    if(wrA>wrS) strongest=a;
+    if(wrA<wrW) weakest=a;
+  });
+  const strongWR=archOverall[strongest].games>0?archOverall[strongest].wins/archOverall[strongest].games:0;
+  const weakWR=archOverall[weakest].games>0?archOverall[weakest].wins/archOverall[weakest].games:0;
+  const gap=(strongWR-weakWR)*100;
+  recs.push({
+    title:`Archetype Balance: ${AI_ARCHETYPES[strongest].label} strongest (${(strongWR*100).toFixed(1)}%), ${AI_ARCHETYPES[weakest].label} weakest (${(weakWR*100).toFixed(1)}%)`,
+    body:`Win rate gap is ${gap.toFixed(1)}%. ${gap>25?'This is a significant imbalance — consider reducing '+AI_ARCHETYPES[strongest].label+' aggression/expansion multipliers or boosting '+AI_ARCHETYPES[weakest].label+'\'s scores.':'Gap is within acceptable range.'}`,
+    code: gap>25 ? `// In AI_ARCHETYPES in index.html:\n// Reduce ${strongest} scores OR increase ${weakest} scores.\n// Example — reduce ${strongest} aggression slightly:\nconst AI_ARCHETYPES={\n  ...existing...\n  ${strongest}: {...existing.${strongest}, aggression: ${(AI_ARCHETYPES[strongest].aggression*0.9).toFixed(2)}},\n};` : null,
+    type: gap>25?'warn':'good'
+  });
+
+  // 3. Turtle vs balanced at gamble=3: if turtle winning >60%, recommend gamble=4
+  const gc3=data.gambleCost[3];
+  const turtleData3=gc3.byArch['turtle']||{wins:0,games:0};
+  const turtleWR3=turtleData3.games>0?turtleData3.wins/turtleData3.games:0;
+  if(turtleWR3>0.60){
+    const gc4=data.gambleCost[4];
+    const turtleData4=gc4.byArch['turtle']||{wins:0,games:0};
+    const turtleWR4=turtleData4.games>0?turtleData4.wins/turtleData4.games:0;
+    recs.push({
+      title:`Gamble Cost: Increase to 4 (Turtle too strong at cost=3)`,
+      body:`Turtle wins ${(turtleWR3*100).toFixed(1)}% vs Balanced at gamble cost 3 — above the 60% concern threshold. At cost=4, Turtle wins ${(turtleWR4*100).toFixed(1)}%, which is ${turtleWR4<=0.60?'healthier':'still high but better'}.`,
+      code:`// In index.html costs default:\nconst costs={buildNormal:2, buildCenter:3, move:2, attackNormal:3,\n  attackCenter:4, attackBase:5, gamble:4, startAP:4};`,
+      type:'warn'
+    });
+  } else {
+    recs.push({
+      title:`Gamble Cost = 3 is Balanced`,
+      body:`Turtle wins ${(turtleWR3*100).toFixed(1)}% vs Balanced at gamble=3 — below the 60% concern threshold. No change needed.`,
+      code:null,
+      type:'good'
+    });
+  }
+
+  // 4. Best win condition combo for ~18 avg turns with <5% unfinished
+  let bestCombo=null, bestScore=999;
+  [4,5,6].forEach(cv=>{[6,8,10].forEach(hc=>{
+    const key=`cv${cv}_hc${hc}`;
+    const b=data.winConditions[key];
+    const ufpct=b.unfinished/N;
+    const diff=Math.abs(b.avgTurns-18)+(ufpct*100);
+    if(diff<bestScore&&ufpct<0.15){bestScore=diff;bestCombo={cv,hc,batch:b};}
+  });});
+  if(bestCombo){
+    const isDefault=bestCombo.cv===6&&bestCombo.hc===8;
+    recs.push({
+      title:`Win Conditions: centerVerts=${bestCombo.cv}, hexCount=${bestCombo.hc} recommended${isDefault?' (same as default)':''}`,
+      body:`This combo gives ${bestCombo.batch.avgTurns.toFixed(1)} avg turns with ${(bestCombo.batch.unfinished/N*100).toFixed(0)}% stalls — closest to the ideal ~18 turns with <5% unfinished.`,
+      code: isDefault ? null : `// In index.html winConfig default:\nconst winConfig={centerVerts:${bestCombo.cv}, hexCount:${bestCombo.hc}};`,
+      type: isDefault?'good':'warn'
+    });
+  }
+
+  // 5. Recommended default AI archetype for 1P vs AI
+  // Best archetype to face is the one with highest win rate (challenges the player most)
+  // For 1P the human faces one AI — we want the AI to be the strongest one
+  recs.push({
+    title:`Recommended Default AI Archetype for 1P vs AI: ${AI_ARCHETYPES[strongest].label}`,
+    body:`${AI_ARCHETYPES[strongest].label} has the highest overall 1v1 win rate (${(strongWR*100).toFixed(1)}%), making it the most challenging opponent for a human player. In index.html, the default AI archetype for slot 1 (index 1) should be set to "${strongest}".`,
+    code:`// In index.html aiArchetypes array (line ~304):\nconst aiArchetypes=['balanced','${strongest}','builder','runner'];`,
+    type:'good'
+  });
+
+  // Build the section
+  recs.forEach(r=>{
+    const box=document.createElement('div');
+    box.className='rec-box';
+    const badge=`<span class="badge ${r.type}">${r.type.toUpperCase()}</span>`;
+    box.innerHTML=`<h4>${badge} ${escHtml(r.title)}</h4><p>${escHtml(r.body)}</p>${r.code?`<div class="code">${escHtml(r.code)}</div>`:''}`;
+    s.appendChild(box);
+  });
+
+  return s;
+}
+
+function escHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
