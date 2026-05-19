@@ -185,11 +185,11 @@ canvas{display:block;touch-action:manipulation;}
       <h3>Pergalės Sąlygos</h3>
       <div class="cost-row">
         <span>⬢ Centro viršūnės (3-6)</span>
-        <div class="cost-stepper"><button onclick="adjWin('centerVerts',-1)">−</button><div class="cost-val" id="val-centerVerts">6</div><button onclick="adjWin('centerVerts',1)">+</button></div>
+        <div class="cost-stepper"><button onclick="adjWin('centerVerts',-1)">−</button><div class="cost-val" id="val-centerVerts">4</div><button onclick="adjWin('centerVerts',1)">+</button></div>
       </div>
       <div class="cost-row">
         <span>▦ Heksagonai (3-18)</span>
-        <div class="cost-stepper"><button onclick="adjWin('hexCount',-1)">−</button><div class="cost-val" id="val-hexCount">8</div><button onclick="adjWin('hexCount',1)">+</button></div>
+        <div class="cost-stepper"><button onclick="adjWin('hexCount',-1)">−</button><div class="cost-val" id="val-hexCount">6</div><button onclick="adjWin('hexCount',1)">+</button></div>
       </div>
       <div class="help">+ paskutinio gynėjo sąlyga visada įjungta. Mažesni skaičiai = trumpesni žaidimai.</div>
     </div>
@@ -293,19 +293,19 @@ const ALL_POWERS=[
 // movement field controls how willing AI is to spend AP on moves
 const AI_ARCHETYPES={
   balanced:  { label:'Balanced',  aggression:1.0, expansion:1.0, defense:1.0, gambleChance:0.20, centerPriority:1.0, movement:0.7 },
-  aggressor: { label:'Aggressor', aggression:1.7, expansion:0.7, defense:0.5, gambleChance:0.10, centerPriority:0.6, movement:0.4 },
-  builder:   { label:'Builder',   aggression:0.5, expansion:1.6, defense:1.0, gambleChance:0.15, centerPriority:1.5, movement:0.4 },
+  aggressor: { label:'Aggressor', aggression:1.7, expansion:0.9, defense:0.5, gambleChance:0.10, centerPriority:1.1, movement:0.4 },
+  builder:   { label:'Builder',   aggression:0.7, expansion:1.6, defense:1.0, gambleChance:0.15, centerPriority:1.5, movement:0.4 },
   turtle:    { label:'Turtle',    aggression:0.4, expansion:0.7, defense:1.6, gambleChance:0.45, centerPriority:0.8, movement:0.3 },
   runner:    { label:'Bėgikas',   aggression:0.9, expansion:0.9, defense:0.7, gambleChance:0.15, centerPriority:1.4, movement:2.8 },
 };
 
 let selectedPC=2, selectedHumans=1, selectedSimGames=25;
 const enabledPowers=new Set([0,1,2,3,4]);
-const aiArchetypes=['balanced','aggressor','builder','runner']; // default mix includes runner
+const aiArchetypes=['balanced','builder','turtle','runner'];
 const costs={buildNormal:2, buildCenter:3, move:2, attackNormal:3, attackCenter:4, attackBase:5, gamble:3, startAP:4};
 const costMin={buildNormal:1, buildCenter:1, move:1, attackNormal:1, attackCenter:1, attackBase:1, gamble:1, startAP:2};
 const costMax={buildNormal:9, buildCenter:9, move:9, attackNormal:9, attackCenter:9, attackBase:12, gamble:9, startAP:12};
-const winConfig={centerVerts:6, hexCount:8};
+const winConfig={centerVerts:4, hexCount:6};
 const winMin={centerVerts:3, hexCount:3};
 const winMax={centerVerts:6, hexCount:18};
 
@@ -939,8 +939,8 @@ function aiPickAction(p){
     const c=attackCost(v); if(p.ap<c) return;
     let score;
     if(v.isBase){ score=200*arch.aggression - c*4; }
-    else if(v.hexIds.includes(0)){ score=60*arch.aggression*arch.centerPriority - c*2; }
-    else { score=40*arch.aggression - c*2; }
+    else if(v.hexIds.includes(0)){ score=60*arch.aggression*arch.centerPriority - c*3; }
+    else { score=40*arch.aggression - c*3; }
     candidates.push({type:'attack', target:v, cost:c, score});
   });
 
