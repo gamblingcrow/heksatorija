@@ -36,6 +36,19 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;fo
 .power-toggle .pt-icon{color:var(--purple);font-size:14px;}
 .power-toggle .pt-label{flex:1;}
 .power-toggle .pt-check{font-size:14px;}
+.option-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;cursor:pointer;}
+.option-row input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+.cp-form{display:flex;flex-direction:column;gap:6px;margin-top:8px;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;}
+.cp-form label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:-2px;}
+.cp-form input,.cp-form select,.cp-form textarea{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 7px;border-radius:3px;font-size:12px;font-family:inherit;width:100%;}
+.cp-form input:focus,.cp-form select:focus,.cp-form textarea:focus{outline:none;border-color:var(--gold-dim);}
+.cp-form textarea{resize:none;height:44px;}
+.cp-form-row{display:flex;gap:6px;}
+.cp-form-row>*{flex:1;}
+.cp-add-btn{background:var(--purple);border:none;color:#fff;padding:7px;border-radius:3px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.05em;}
+.cp-add-btn:hover{opacity:.85;}
+.pt-del{background:none;border:none;color:#e74c3c;font-size:13px;cursor:pointer;padding:0 2px;opacity:.6;}
+.pt-del:hover{opacity:1;}
 .archetype-row{display:flex;align-items:center;gap:8px;padding:3px 0;}
 .archetype-row .ar-dot{width:10px;height:10px;border-radius:50%;}
 .archetype-row .ar-name{font-size:12px;flex:1;}
@@ -179,6 +192,7 @@ canvas{display:block;touch-action:manipulation;}
         <div class="cost-val" id="val-startAP">5</div>
         <button onclick="adj('startAP',1)">+</button>
       </div>
+      <label class="option-row" style="margin-top:4px;"><input type="checkbox" id="auto-end-toggle" onchange="autoEndTurn=this.checked"> Automatiškai baigti ėjimą (0 AP)</label>
     </div>
 
     <div class="setup-box">
@@ -207,9 +221,37 @@ canvas{display:block;touch-action:manipulation;}
     </div>
 
     <div class="setup-box">
-      <h3>Specialios Galios <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;">(įjunk arba išjunk)</span></h3>
-      <div id="powers-list"></div>
-      <div class="help" style="margin-top:4px;">Įjungtos galios atsiranda kaip ✦ heksagonai lentoje.</div>
+      <h3>Specialios Galios</h3>
+      <label class="option-row"><input type="checkbox" id="powers-master-toggle" checked onchange="togglePowersEnabled(this.checked)"> Naudoti specialias galias</label>
+      <div id="powers-body">
+        <div id="powers-list"></div>
+        <div class="help" style="margin-top:4px;">Paspaudžiant galią ją įjungi arba išjungi. Įjungtos galios atsiranda kaip ✦ heksagonai lentoje.</div>
+        <div class="cp-form" id="custom-power-form">
+          <b style="font-size:11px;color:var(--gold);">+ Sukurti savo galią</b>
+          <div class="cp-form-row">
+            <div><label>Pavadinimas</label><input id="cp-name" type="text" maxlength="18" placeholder="Mano galia"></div>
+            <div><label>Ikona (1-2 rašt.)</label><input id="cp-icon" type="text" maxlength="2" placeholder="★"></div>
+          </div>
+          <label>Aprašymas</label>
+          <textarea id="cp-desc" placeholder="Ką ši galia daro?"></textarea>
+          <div class="cp-form-row">
+            <div>
+              <label>Efektas</label>
+              <select id="cp-effect" onchange="updateCPValueVisibility()">
+                <option value="ap_surge">Momentinis AP (+N iš karto)</option>
+                <option value="ap_bonus">+N AP kas ėjimą</option>
+                <option value="refund">AP grąžinimas puolant</option>
+                <option value="counter">AP kontrataka (kai puolamas)</option>
+                <option value="bank_bonus">Banko talpos +N</option>
+                <option value="shield">Gynybinis skydas (N ėjimų)</option>
+                <option value="cheap_gamble">Pigus lošimas (−1 lošimo kaina)</option>
+              </select>
+            </div>
+            <div id="cp-val-wrap"><label>Reikšmė (N)</label><input id="cp-value" type="number" min="1" max="6" value="2"></div>
+          </div>
+          <button class="cp-add-btn" onclick="addCustomPower()">PRIDĖTI GALIĄ</button>
+        </div>
+      </div>
     </div>
 
     <div class="setup-box" id="ai-box">
@@ -304,8 +346,54 @@ const AI_ARCHETYPES={
 };
 
 let selectedPC=2, selectedHumans=1, selectedSimGames=25;
-const enabledPowers=new Set([0,1,2,3,4,5,6]);
+let enabledPowers=new Set([0,1,2,3,4,5,6]);
 const aiArchetypes=['balanced','collector','eliminator','turtle'];
+let powersEnabled=true;
+let autoEndTurn=false;
+
+function loadCustomPowers(){
+  try{ const s=localStorage.getItem('heksatorija_custom_powers'); if(s) JSON.parse(s).forEach(p=>ALL_POWERS.push(p)); }catch(e){}
+}
+function saveCustomPowers(){
+  try{ localStorage.setItem('heksatorija_custom_powers', JSON.stringify(ALL_POWERS.filter(p=>p.custom))); }catch(e){}
+}
+function togglePowersEnabled(on){
+  powersEnabled=on;
+  document.getElementById('powers-body').style.opacity=on?'1':'0.4';
+  document.getElementById('powers-body').style.pointerEvents=on?'':'none';
+}
+function updateCPValueVisibility(){
+  const e=document.getElementById('cp-effect').value;
+  document.getElementById('cp-val-wrap').style.display=e==='cheap_gamble'?'none':'';
+}
+function addCustomPower(){
+  const name=document.getElementById('cp-name').value.trim();
+  const icon=document.getElementById('cp-icon').value.trim()||'★';
+  const desc=document.getElementById('cp-desc').value.trim();
+  const effect=document.getElementById('cp-effect').value;
+  const value=parseInt(document.getElementById('cp-value').value)||2;
+  if(!name){alert('Įveskite galios pavadinimą!');return;}
+  if(!desc){alert('Įveskite aprašymą!');return;}
+  const id=Date.now()%1000000+100;
+  const pw={id, name, short:icon, desc, effect, custom:true, ...(effect!=='cheap_gamble'&&{value})};
+  ALL_POWERS.push(pw);
+  enabledPowers.add(id);
+  saveCustomPowers();
+  document.getElementById('cp-name').value='';
+  document.getElementById('cp-icon').value='';
+  document.getElementById('cp-desc').value='';
+  renderPowers();
+}
+function deleteCustomPower(id,e){
+  e.stopPropagation();
+  ALL_POWERS.splice(ALL_POWERS.findIndex(p=>p.id===id),1);
+  enabledPowers.delete(id);
+  saveCustomPowers();
+  renderPowers();
+}
+function maybeAutoEndTurn(p){
+  if(autoEndTurn && p.isHuman && p.ap===0 && !G.gameOver) setTimeout(endTurn,300);
+}
 const costs={buildNormal:2, buildCenter:3, move:2, attackNormal:3, attackCenter:5, attackBase:5, gamble:3, startAP:5};
 const costMin={buildNormal:1, buildCenter:1, move:1, attackNormal:1, attackCenter:1, attackBase:1, gamble:1, startAP:2};
 const costMax={buildNormal:9, buildCenter:9, move:9, attackNormal:9, attackCenter:9, attackBase:12, gamble:9, startAP:12};
@@ -338,8 +426,9 @@ function renderPowers(){
   ALL_POWERS.forEach(pw=>{
     const el=document.createElement('div');
     el.className='power-toggle'+(enabledPowers.has(pw.id)?' on':'');
-    el.innerHTML=`<span class="pt-icon">${pw.short}</span><span class="pt-label"><b>${pw.name}</b><div style="font-size:10px;color:var(--text-dim);margin-top:1px;">${pw.desc}</div></span><span class="pt-check">${enabledPowers.has(pw.id)?'✓':'·'}</span>`;
-    el.onclick=()=>{ if(enabledPowers.has(pw.id)) enabledPowers.delete(pw.id); else enabledPowers.add(pw.id); renderPowers(); };
+    const delBtn=pw.custom?`<button class="pt-del" title="Ištrinti" onclick="deleteCustomPower(${pw.id},event)">🗑</button>`:'';
+    el.innerHTML=`<span class="pt-icon">${pw.short}</span><span class="pt-label"><b>${pw.name}</b>${pw.custom?` <span style="font-size:9px;color:var(--purple);">[sava]</span>`:''}${pw.value!==undefined?` <span style="font-size:9px;color:var(--text-dim);">(N=${pw.value})</span>`:''}<div style="font-size:10px;color:var(--text-dim);margin-top:1px;">${pw.desc}</div></span><span class="pt-check">${enabledPowers.has(pw.id)?'✓':'·'}</span>${delBtn}`;
+    el.onclick=(e)=>{ if(e.target.closest('.pt-del')) return; if(enabledPowers.has(pw.id)) enabledPowers.delete(pw.id); else enabledPowers.add(pw.id); renderPowers(); };
     c.appendChild(el);
   });
 }
@@ -364,7 +453,7 @@ function renderArchetypes(){
   });
 }
 function adjSimGames(d){ selectedSimGames=Math.min(500,Math.max(1,selectedSimGames+d)); document.getElementById('val-simGames').textContent=selectedSimGames; }
-selectPC(2); renderPowers(); renderArchetypes(); updateHumansUI();
+loadCustomPowers(); updateCPValueVisibility(); selectPC(2); renderPowers(); renderArchetypes(); updateHumansUI();
 
 // ── HEX MATH ─────────────────────────────────────────
 function hexCorners(cx,cy,r){ const pts=[]; for(let i=0;i<6;i++){const a=Math.PI/3*i+Math.PI/6;pts.push({x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)});} return pts; }
@@ -475,7 +564,7 @@ function buildBoardForRealGame(names){
   const w=area.clientWidth, h=area.clientHeight;
   canvas.width=w; canvas.height=h;
   HEX_R=computeHexR(w,h);
-  G=initGameState({pc:selectedPC, humans:selectedHumans, names, powerIds:enabledPowers, archetypes:aiArchetypes, isSim:false});
+  G=initGameState({pc:selectedPC, humans:selectedHumans, names, powerIds:powersEnabled?enabledPowers:new Set(), archetypes:aiArchetypes, isSim:false});
   rebuildGeometry(w,h);
 
   if(!canvas._wired){
@@ -606,8 +695,8 @@ function applyAttack(v,p){
   } else {
     v.owner=p.id; p.stats.attackNormal++;
   }
-  if(hasPower(p,'refund')) p.ap=Math.min(p.ap+1,12);
-  if(!v.isBase && hasPower(target,'counter') && target.alive) target.ap=Math.min(target.ap+1,12);
+  if(hasPower(p,'refund')){ const rp=p.powers.find(pw=>pw.effect==='refund'); p.ap=Math.min(p.ap+(rp?.value||1),12); }
+  if(!v.isBase && hasPower(target,'counter') && target.alive){ const cp=target.powers.find(pw=>pw.effect==='counter'); target.ap=Math.min(target.ap+(cp?.value||1),12); }
   checkPowerRevealOn(v,p);
   updateConnectivity();
   return target;
@@ -639,9 +728,9 @@ function checkPowerRevealOn(v,p){
     const verts=h.vertices.map(v=>G.vByKey.get(vKey(v.x,v.y)));
     if(verts.every(u=>u&&u.owner===p.id)){
       h.powerRevealed=true; const pw=h.powerData; p.powers.push(pw);
-      if(pw.effect==='bank_bonus') p.maxBank=Math.min(p.maxBank+2,12);
-      if(pw.effect==='shield')     p.shieldTurns=2;
-      if(pw.effect==='ap_surge')   p.ap=Math.min(p.ap+3,12);
+      if(pw.effect==='bank_bonus') p.maxBank=Math.min(p.maxBank+(pw.value||2),12);
+      if(pw.effect==='shield')     p.shieldTurns=pw.value||2;
+      if(pw.effect==='ap_surge')   p.ap=Math.min(p.ap+(pw.value||3),12);
       if(!G.isSim){
         if(p.isHuman){ G.pendingPower={name:pw.name,desc:pw.desc}; showPowerPopup(pw); }
         log(`${p.name} gavo galią: ${pw.name}!`,'good');
@@ -677,7 +766,7 @@ function doBuildAt(v){
   applyBuild(v,p);
   log(`${p.name}: pastatė (${c} AP)`,p.isHuman?'me':'');
   G.selectedAction=null; document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  checkWin(); computeHighlights(); renderAll(); updateUI();
+  checkWin(); computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doMoveAt(v){
   const p=G.players[G.currentPlayer];
@@ -693,7 +782,7 @@ function doMoveAt(v){
   log(`${p.name}: pajudino (${costs.move} AP)`,p.isHuman?'me':'');
   G.moveSource=null; G.selectedAction=null;
   document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  checkWin(); computeHighlights(); renderAll(); updateUI();
+  checkWin(); computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doAttackAt(v){
   const p=G.players[G.currentPlayer];
@@ -709,7 +798,7 @@ function doAttackAt(v){
   if(wasBase) log(`${target.name} bazė sunaikinta!`,'warn');
   log(`${p.name}: puolė (${c} AP)`,p.isHuman?'me':'');
   G.selectedAction=null; document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  checkWin(); computeHighlights(); renderAll(); updateUI();
+  checkWin(); computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doGamble(){
   const p=G.players[G.currentPlayer];
@@ -721,7 +810,7 @@ function doGamble(){
   const tag = r.net>0?'good':(r.net<0?'warn':'me');
   log(`🎲 ${p.name}: d6=${r.roll}, gauta ${r.payout}, neto ${r.net>=0?'+':''}${r.net} AP`,tag);
   G.selectedAction=null; document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected'));
-  computeHighlights(); renderAll(); updateUI();
+  computeHighlights(); renderAll(); updateUI(); maybeAutoEndTurn(p);
 }
 function doBank(){
   const p=G.players[G.currentPlayer];
@@ -921,7 +1010,8 @@ function nextPlayer(){
   if(next<=G.currentPlayer) G.turnNum++;
   G.currentPlayer=next;
   const np=G.players[next];
-  const bonus=hasPower(np,'ap_bonus')?1:0;
+  const apBonusPw=np.powers.find(pw=>pw.effect==='ap_bonus');
+  const bonus=apBonusPw?(apBonusPw.value||1):0;
   np.ap=costs.startAP+bonus+np.bank; np.bank=0;
   if(bonus&&!G.isSim) log(`${np.name}: +1 AP (galia)`,'good');
   G.undoSnapshot=null;
@@ -1154,7 +1244,7 @@ function runSimulationBatch(){
   function runOne(){
     if(i>=totalGames){ finishSim(aggregate); return; }
     const archs=aiArchetypes.slice(0,selectedPC);
-    G=initGameState({pc:selectedPC,humans:0,names:PLAYER_NAMES_MULTI,powerIds:enabledPowers,archetypes:archs,isSim:true});
+    G=initGameState({pc:selectedPC,humans:0,names:PLAYER_NAMES_MULTI,powerIds:powersEnabled?enabledPowers:new Set(),archetypes:archs,isSim:true});
     archs.forEach(a=>{ aggregate.archCount[a]=(aggregate.archCount[a]||0)+1; aggregate.byArch[a].games++; });
     let safetyTurns=400;
     while(!G.gameOver && safetyTurns-->0){
