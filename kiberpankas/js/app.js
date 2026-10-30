@@ -14,9 +14,28 @@
   ];
 
   let current = null;
+  let lastPath = null;
 
-  async function route() {
-    const path = decodeURIComponent(location.hash.replace(/^#/, "") || "/");
+  const hashPath = () => { try { return decodeURIComponent(location.hash.replace(/^#/, "")); } catch { return ""; } };
+
+  /* Navigacija veikia ir tada, kai adreso juosta nepasiekiama (pvz. įterptoje peržiūroje):
+     maršrutas laikomas atmintyje, o hash atnaujinamas tik jei naršyklė leidžia. */
+  KP.go = (path) => {
+    try { if (hashPath() !== path) history.pushState(null, "", "#" + path); } catch {}
+    route(path);
+  };
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#/"]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || a.target === "_blank") return;
+    e.preventDefault();
+    let path = a.getAttribute("href").slice(1);
+    try { path = decodeURIComponent(path); } catch {}
+    KP.go(path);
+  });
+
+  async function route(forced) {
+    const path = (typeof forced === "string" ? forced : hashPath().startsWith("/") ? hashPath() : lastPath) || "/";
+    lastPath = path;
     const r = ROUTES.find((x) => x.re.test(path)) || ROUTES[0];
     const arg = (path.match(r.re) || [])[1] || "";
 
@@ -73,10 +92,11 @@
   const thumb = KP.$("#humanity-thumb");
   setInterval(() => { thumb.style.left = (62 + Math.random() * 14) + "%"; }, 2600);
 
-  addEventListener("hashchange", route);
+  addEventListener("hashchange", () => { if (hashPath().startsWith("/") && hashPath() !== lastPath) route(hashPath()); });
+  addEventListener("popstate", () => { if (hashPath() !== lastPath) route(hashPath() || "/"); });
   KP.auth.onChange((u) => {
     renderUser(u);
-    if (current?.name === "me" || current?.name === "shop") { current.destroy?.(); current = null; route(); }
+    if (current?.name === "me" || current?.name === "shop") { current.destroy?.(); current = null; route(lastPath); }
   });
 
   KP.auth.init().catch((e) => { console.error(e); KP.toast("Paskyrų serveris nepasiekiamas", true); renderUser(null); }).finally(route);

@@ -37,6 +37,7 @@ window.KP_CONFIG = {
   wiki: {
     root: "wiki/",
     manifest: "wiki/index.json",
+    bundle: "wiki/bundle.json",   // sugeneruojamas kartu su index.json
     github: { owner: "gamblingcrow", repo: "heksatorija", branch: "main", path: "kiberpankas/wiki" },
     home: "Kaunas 2023"
   },

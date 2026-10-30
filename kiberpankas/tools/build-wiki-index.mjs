@@ -1,4 +1,4 @@
-// Sugeneruoja kiberpankas/wiki/index.json – visų wiki failų sąrašą.
+// Sugeneruoja kiberpankas/wiki/index.json (failų sąrašas) ir bundle.json (visas tekstas vienu failu).
 // Paleisk po to, kai įkėlei naujus Obsidian užrašus:
 //   node kiberpankas/tools/build-wiki-index.mjs
 import { readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
@@ -7,16 +7,20 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "wiki");
 const out = [];
+const bundle = {};
 
 function walk(dir) {
   for (const name of readdirSync(dir).sort()) {
     if (name.startsWith(".") || name === "index.json") continue;
     const p = join(dir, name);
     if (statSync(p).isDirectory()) { walk(p); continue; }
+    if (name === "bundle.json") continue;
     const rel = relative(root, p).split("\\").join("/");
     if (!/\.md$/i.test(name)) { out.push(rel); continue; }
     // aliases iš frontmatter, kad [[Sinonimas]] nuorodos veiktų
-    const fm = readFileSync(p, "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    const text = readFileSync(p, "utf8");
+    bundle[rel] = text;
+    const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     const m = fm && fm[1].match(/^aliases:\s*\[(.*)\]\s*$/m);
     const aliases = m ? m[1].split(",").map((s) => s.trim().replace(/^["']|["']$/g, "")).filter(Boolean) : [];
     out.push(aliases.length ? { path: rel, aliases } : rel);
@@ -25,4 +29,5 @@ function walk(dir) {
 
 walk(root);
 writeFileSync(join(root, "index.json"), JSON.stringify(out, null, 1) + "\n");
+writeFileSync(join(root, "bundle.json"), JSON.stringify(bundle) + "\n");
 console.log(`wiki/index.json: ${out.length} failų`);

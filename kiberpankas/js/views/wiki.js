@@ -17,6 +17,10 @@
     if (index) return index;
     let list = null;
     try { list = await KP.fetchJSON(cfg.manifest); } catch {}
+    // bundle.json = visi užrašai vienu failu (greitesnė paieška ir atgalinės nuorodos)
+    if (list && cfg.bundle) {
+      try { for (const [k, v] of Object.entries(await KP.fetchJSON(cfg.bundle))) cache.set(k, v); } catch {}
+    }
     if (!list && cfg.github?.repo) {
       try {
         const g = cfg.github;

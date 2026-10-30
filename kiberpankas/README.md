@@ -45,9 +45,9 @@ Repo → Settings → Pages → Source: *Deploy from a branch* → `main` / `(ro
 ### Wiki (Obsidian)
 1. Obsidian'e atidaryk `kiberpankas/wiki/` kaip vault'ą (arba nukopijuok savo vault'o failus čia).
 2. Rašyk kaip įprasta: veikia `[[nuorodos]]`, `[[nuoroda|tekstas]]`, `![[paveikslas.png]]`, `==žymėjimas==`, `%%slapti komentarai%%`, callout'ai (`> [!note]`, `> [!warning]`, `> [!gm]`), frontmatter `tags` ir `aliases`.
-3. Paleisk `node kiberpankas/tools/build-wiki-index.mjs` ir įkelk į repo.
+3. Paleisk `node kiberpankas/tools/build-wiki-index.mjs` ir įkelk į repo. Jis sukuria `index.json` (failų sąrašą) ir `bundle.json` (visus užrašus viename faile, kad paieška būtų greita).
 
-**Be jokio paleidinėjimo:** įdiek Obsidian įskiepį **Obsidian Git** ir ištrink `wiki/index.json`. Tada svetainė failų sąrašą ims tiesiai iš GitHub (`config.wiki.github`), ir kiekvienas tavo push'as iškart matysis svetainėje.
+**Be jokio paleidinėjimo:** įdiek Obsidian įskiepį **Obsidian Git** ir ištrink `wiki/index.json` ir `wiki/bundle.json`. Tada svetainė failų sąrašą ims tiesiai iš GitHub (`config.wiki.github`), ir kiekvienas tavo push'as iškart matysis svetainėje.
 
 > `%%komentarai%%` paslepiami tik svetainėje. Repo vis tiek viešas, todėl tikrų GM paslapčių į jį nedėk.
 
@@ -76,7 +76,13 @@ Kol KML nėra, rodomi `data/map.geojson` taškai (koordinatės apytikslės, paga
 - `twitchChannel` arba `youtubeLiveId`: grotuvas puslapyje „Eteris“. Kai nustatyta, LCD ekranėlyje dega ON AIR.
 - `discordUrl`, `nextSession` (ISO data): atgalinis laikmatis pagrindiniame ir „Eteris“ puslapiuose.
 
-Kad žiūrovai galėtų prisijungti prie Foundry iš interneto, Foundry turi būti pasiekiamas iš išorės: port-forward 30000 arba, saugiau, **Cloudflare Tunnel** / „The Forge“ hostingas. Svetainė pati nieko nehostina, ji tik nukreipia.
+**Foundry ant Raspberry Pi (home lab).** Kad žaidėjai galėtų prisijungti iš interneto, Pi turi būti pasiekiamas iš išorės. Saugiausias ir paprasčiausias būdas, kai domenas jau yra:
+1. Perkelk `kiberpankas.net` DNS į Cloudflare (nemokamai).
+2. Ant Pi įdiek `cloudflared` ir sukurk tunelį: `foundry.kiberpankas.net` → `http://localhost:30000`.
+3. Foundry nustatymuose (`options.json`) įrašyk `"hostname": "foundry.kiberpankas.net"`, `"proxySSL": true`, `"proxyPort": 443`.
+4. Į `config.live.foundryUrl` įrašyk `https://foundry.kiberpankas.net`.
+
+Taip nereikia atidarinėti portų maršrutizatoriuje, o namų IP lieka paslėptas. Svetainė pati nieko nehostina, ji tik nukreipia.
 
 ### Naujienos ir LCD juosta
 `data/news.json` (naujienų kanalas pagrindiniame puslapyje) ir `config.ticker` (bėganti eilutė grotuvo ekranėlyje).
