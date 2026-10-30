@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- KiberPankas emblema: keturios atskirtos rombo dalys + centrinė akis -->
+  <g fill="#c1121f">
+    <path d="M57 6 L57 49 L14 49 Z"/>
+    <path d="M63 6 L106 49 L63 49 Z"/>
+    <path d="M57 71 L57 114 L14 71 Z"/>
+    <path d="M63 71 L106 71 L63 114 Z"/>
+  </g>
+  <circle cx="60" cy="60" r="9" fill="none" stroke="#c1121f" stroke-width="4"/>
+  <circle cx="60" cy="60" r="3" fill="#c1121f"/>
+</svg>

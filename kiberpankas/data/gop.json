@@ -1,0 +1,389 @@
+{
+ "gangs": [
+  {
+   "name": "Gatviniai",
+   "quote": "Ė, duok parūkyt.",
+   "desc": "Vieni dažniausiai sutinkamų pavienių tipų mieste. Jie nėra bendra grupuotė – daugiau tipažas, kuris greičiausiai galvoja, kad yra kietesnis už tave, todėl gali duoti į skudurus. Ar tu išsigąsi? Galima tikėtis įvairių smulkių ginklų ir augmentacijų. Dažniausiai apsmukę rūbai ir pilno dydžio kepurės.",
+   "base": "Visame mieste",
+   "rep": 0
+  },
+  {
+   "name": "TeoLoginės grupuotės",
+   "quote": "Dievybė yra viena – ir tai maniškė.",
+   "desc": "Įvairių tikėjimų grupuotės, čia aprašomos kaip viena, vėliau atrandamos su laiku: katalikai, islamas, judaizmas, budizmas, Nemirtingoji piramidė (žmonės neturi sielos ir siekia nemirtingumo), Nakties garbintojai (miega dieną, saugo gatves naktį), Antisatanizmo koalicija (tiki, kad pasaulį valdo viena grupė žmonių), Skaitmeninės dievybės (žmogus išrado kibernetiką – vadinasi, žmogus yra dievas), Realizmas (mes esam VR simuliacijoje), Malizmas (visi yra nusidėjėliai, todėl nusipelnė mirties).",
+   "base": "Miestas",
+   "rep": 0
+  },
+  {
+   "name": "Stileivos",
+   "quote": "Ką manai apie šį fasoną? Neblogai, ane?",
+   "desc": "Dėmesio ištroškę naktiniai padarai. Pilni stilistinių augmentacijų ir daugiau mažai ko verti. Tačiau turi nemažai sekėjų, todėl rekomenduojama neužsirauti – tarp fanų gali būti ir skerdikų. Mėgsta įvairias tematikas, todėl randami įvairiuose amplua.",
+   "base": "Prabangūs rajonai",
+   "rep": 0
+  },
+  {
+   "name": "Ginklanešiai",
+   "quote": "Šitas? Jo, mes jo neturim. *apsižvalgo* Ateik…",
+   "desc": "Miesto gatvėmis klaidžiojantys neoficialūs juodosios rinkos prekeiviai. Paprastai nėra stipriai augmentuoti, bet labai stipriai ginkluoti – patartina neatsidurti jų blogojoj pusėj. Ginklų pasiūla nepastovi, viskas priklauso nuo tavo sėkmės (LUCK).",
+   "base": "Visame mieste",
+   "rep": 0
+  },
+  {
+   "name": "Sunkiasvoriai",
+   "quote": "Ė, tu! Berods pametei savo pūškę.",
+   "desc": "Milžiniški raumenų kalnai, mėgstantys pasikapoti tarpuvartėse tarp to laiko, kai gurkšnoja alutį bare ir daužo skerdikų galvas į sieną. Ypatingų kovos menų neturi, bet tai atstoja jų dydis. Skiriamasis ženklas – bordinė beretė ir cigaras. Šūkis: „JEI DARAI – DARYK GERAI!!\"",
+   "base": "Slabotkės šiaurė",
+   "rep": 0
+  },
+  {
+   "name": "Bombonešiai",
+   "quote": "BŪŪM I NĖR!!!",
+   "desc": "Garsūs, bet ne dėl reputacijos – jų granatos aidi per visą Aleksotą. Pilni pigių augmentacijų, nes rankų ir kojų neteko jau ne kartą, o sprogmenų gamyba nėra pigi. Dažniausiai sprogdina turtą, ne žmones. Kovoja išrūkydami priešininkus iš už priedangos.",
+   "base": "Aleksotas",
+   "rep": -1
+  },
+  {
+   "name": "Skeltavamzdžiai",
+   "quote": "Ble, matei kaip ištaškė?!!",
+   "desc": "Didelė grupuotė, užsiimanti medžioklinių ginklų ir jų modifikacijų prekyba juodojoje rinkoje. Samdomi, bet greičiausiai pirmiausia atbaidytų savo kvapu. Jokio subtilumo – priešą užgožia skaičiais ir šaunamąja galia.",
+   "base": "Slabotkės rytai (prie centrinio tilto)",
+   "rep": 0
+  },
+  {
+   "name": "B.O.M.Ž.",
+   "quote": "Tik 1 eb prašau, trūksta man ant alučio… *klausosi*",
+   "desc": "Jų galia – informacija, jų apygarda – visas miestas. B.O.M.Ž. nėra organizacija; tai žmonės, siekiantys išgyventi. O kartais išgyventi reikia kraštutinių veiksmų, todėl jais pasitikėti gali tik tie, kurie patikimi jiems.",
+   "base": "Jų ausys ir akys visur",
+   "rep": 0
+  },
+  {
+   "name": "Autofanai",
+   "quote": "Atsukęs turbokompresorių, supisi visą trauką, seni.",
+   "desc": "Naktinio miesto gatvėmis lenktyniaujantys ir jokioms taisyklėms nepaklūstantys. Jų automobiliai greičiausi, apsukos didžiausios. Reikia mažiau legalios detalės? Greitai parūpins – tik gali paprašyti pravažiuoti, o kaip toliau, parodys likimo posūkis.",
+   "base": "Naktinis miestas – jų gatvės",
+   "rep": 0
+  },
+  {
+   "name": "Imigrantai",
+   "quote": "Sorry, I can't understand your language, I'm from Bristol ma man, might I join your night ride?",
+   "desc": "Įvairaus plauko, spalvos ir tautų atstovai, atvykę ir nelabai pritapę, susiburia į mažas bendruomenes, kurios vakarais terorizuoja miestą. Grupuotės įvairių tautybių; viena labiausiai paplitusių – rusų Gopnikai.",
+   "base": "Įvairios miesto vietos, priklauso nuo tautybės",
+   "rep": 0
+  },
+  {
+   "name": "Kabeliai",
+   "quote": "Tu manai, tai mano tikrosios galios?",
+   "desc": "Technonindzių būrelis, dažnai samdomas korporacijų infiltracijai ir informacijai išgauti. Stilius primena industrial aprangą. Paprastai neagresyvūs, bet išerzinti parodo tikras savo galimybes. Venk artimos kovos – jie gerai išmano kovos menus ir nuotolinį valdymą.",
+   "base": "Turtingesni rajonai, kur leidžia korporacijose uždirbtus pinigus",
+   "rep": 0
+  },
+  {
+   "name": "Elektronai",
+   "quote": "// seniukai, jei skaitai – tavo kodas jau Juodojoj :* //",
+   "desc": "Gatvėse praktiškai nesutiksi, bet jei nors kartą nėrei į kibererdvę – tikrai girdėjai. Kai kurie susipažino asmeniškai, kai jų tapatybė buvo pavogta, o sąskaitos ištuštintos. Niekam nepavyko jų sugauti, o kas prisiartina, iškepamas gyvas.",
+   "base": "Kibererdvė",
+   "rep": 0
+  },
+  {
+   "name": "Naktiniai varnai",
+   "quote": "*šešėlis praūžia virš galvos*",
+   "desc": "Legendomis apipinta grupuotė, kuri naktį gina žmones nuo pavojų. Niekas nežino, kiek jų ir kas jie apskritai, bet paprastas žmogus jaučiasi saugiau, ryte radęs nusikaltėlius pririštus prie policijos nuovados.",
+   "base": "Bazė nežinoma",
+   "rep": 1
+  },
+  {
+   "name": "Maelstromai",
+   "quote": "Galim tau parūpint, kaip ten sako, dalykėlių, bet skolingas geriau nelik.",
+   "desc": "Viena senesnių grupuočių, nebijanti parodyti, kas čia šeimininkas ir už Slabotkės ribų. Struktūra atkeliavusi tiesiai iš JAV. Tiek panirę į augmentacijas, kad dažnas negrįžtamai pasineria į kiberpsichozę. Itin medžiojami Inkvizitorių.",
+   "base": "VII fortas",
+   "rep": -1
+  },
+  {
+   "name": "Skerdikai",
+   "quote": "Plėšyti ir ardyti, skersti ir žudyti, kraujo lašus ant ašmenų matyti.",
+   "desc": "Rengiasi juodais ir raudonais odiniais rūbais su itin aštria atributika. Specializuojasi plėšomaisiais implantais, greiti, kovoja iš arti. Žmonija jiems nerūpi. Norint įstoti, reikia daug aštrių augmentacijų.",
+   "base": "Tolimasis šiaurės vakarų Slabotkės kampas",
+   "rep": -5
+  },
+  {
+   "name": "Inkvizitoriai",
+   "quote": "Žmonijos išsigelbėjimas – laisvė nuo augmentacijų.",
+   "desc": "Viena rečiausių grupuočių: ją sudaro augmentacijų neturintys ir griežtai prieš jas einantys individai, pasišventę išvalyti žmoniją. Ne viena grupuotė žada didelius pinigus už jų vado galvą. Problema – niekas nežino, kas jis ar ji. Veikia tyliai ir efektyviai.",
+   "base": "Bazė nežinoma",
+   "rep": 0
+  },
+  {
+   "name": "Juodosios našlės",
+   "quote": "Tavo kiaušai gerai atrodys pakabinti mano spintoje, iš kurios niekad nebeišlįsi.",
+   "desc": "Diversinė grupuotė, pilna stiprių moterų. Kaip nakties džiunglių amazonės, šluoja gatves nuo piktų ir ambicingų šliužų – vyrų. Atpažįstamos iš ryškių plaukų, moduliatorinių garsiakalbių implantų ir juodosios našlės tatuiruotės. Dažniausiai beisbolo lazdos arba sunkusis arsenalas. Neįvertink artimoje kovoje.",
+   "base": "Netikėčiausiose vietose",
+   "rep": -3
+  },
+  {
+   "name": "Laukiniai",
+   "quote": "Mi-au, gražuoli, koks švelnus tavo kailis. *Mrrrr*",
+   "desc": "Reta frinžinė grupuotė, pasišventusi grįžti į gamtą, keisdama išvaizdą į gyvūnų. Daug augmentacijų dažnai priverčia pamiršti žmogiškumą ir pulti. Naudoja nemažai narkotikų – priprato malšindami augmentacijų skausmus. Itin vikrūs, kovoja iš arti.",
+   "base": "Visame Kaune, susitikimų vietos nežinomos",
+   "rep": -1
+  },
+  {
+   "name": "Galvočiai",
+   "quote": "Mano skaičiavimais, tikimybė, kad buvai sekamas – 35 %. *šūvis*",
+   "desc": "Šaltakraujai, viską apskaičiuojantys, naudoja įgūdžius gerinančias technologijas. Žaidžia sudėtingus žaidimus su partijomis ir organizacijomis. Neagresyvūs, bet labai nemėgstami kitų. Kovoja spęsdami spąstus. Įstoti – tik praėjus IQ testą (INT 9+).",
+   "base": "*/@4436-/**",
+   "rep": 0
+  },
+  {
+   "name": "Klounai",
+   "quote": "Nusišypsok! :}",
+   "desc": "Atpažinti paprasta: dideli batai, raudonos nosys, išdažytas veidas ir neproporcingai didelis ginklas prie tavo kaktos. Terorizuoja gyventojus ir kelia chaosą už Slabotkės ribų. Aukos dažnai pavienės, nukankintos iki išprotėjimo. Naudoja dujines bombas ir žmonių baimes.",
+   "base": "„Paklusnieji\" rajonai ir Slabotkė",
+   "rep": -3
+  },
+  {
+   "name": "EPAI",
+   "quote": "*šūvių salvė* Jau geriau būtum pakėlęs tą šiukšlę!",
+   "desc": "Prižiūri nykstančią gamtą ir dažniausiai kovoja su korporacijomis ir jų daroma žala. Vieni vadina optimistais, kiti – ekoteroristais, bet jie žino: reikia pradėti nuo savęs. Gerai prisitaiko ne miesto sąlygomis.",
+   "base": "Miesto pakraščiai, kur mažiau taršos",
+   "rep": -1
+  },
+  {
+   "name": "Lietpalčiai",
+   "quote": "Ko tu nesupranti, juodas – pisk iš čia.",
+   "desc": "Nacionalinių pažiūrų, agresyvūs imigrantams, gina valstybę ir bendradarbiauja su politinėmis partijomis. Kovos būdai nuo brawl iki improvizuotų ginklų; šaunamuosius traukia, kai reikia „apvalyti visuomenę\". Atpažįstami iš vienodų tamsios odos paltų su nacionaline simbolika.",
+   "base": "Šančiai",
+   "rep": 0
+  },
+  {
+   "name": "GAZ",
+   "quote": "Stambaus motociklo garsai, svarkės kvapas, metalo forma – taip, aš namie.",
+   "desc": "Odinėmis liemenėmis pasidabinusi stambi Slabotkės grupuotė, artimai susijusi su provincijos šeimomis. Prekiauja motociklais ir detalėmis juodojoje rinkoje, perveža ir saugo vertingus krovinius. Vieni kitus pažįsta kaip šeima. Ginklai – grandinės, svarkės, lengvieji automatai šaudymui nuo motociklų.",
+   "base": "Slabotkės pietvakariai",
+   "rep": 0
+  },
+  {
+   "name": "Drugiai",
+   "quote": "Whooooooo, va čia tai hajuuuuus… Wooooop",
+   "desc": "Pastoviai on edge ir ieško, kur gauti kitą dozę. Naktimis ieško šviesų ir tūsų, kas neišvengiamai veda į konfliktus su kitomis grupuotėmis. Pažįsta daug žmonių – galėtų suvesti beveik su bet kuo.",
+   "base": "Loftai prie klubų ir barų",
+   "rep": 0
+  },
+  {
+   "name": "Nostai",
+   "quote": "Žie žie, robotroopas eina. Ble, geras filmas buvo.",
+   "desc": "Nostalgiški ir pasiilgę senų gerų laikų. Rengiasi džinsais ir visuomet kalba referencijomis į seną mediją. Gana nepavojingi, bet mėgsta ilgam prikibti. Dažnas narys – muzikantas, turintis nemažai gerbėjų.",
+   "base": "Visur, kur muzika",
+   "rep": 0
+  }
+ ],
+ "orgs": [
+  {
+   "name": "OmniX",
+   "slogan": "OmniX – su mumis būsi visur.",
+   "desc": "Didžiausia šalyje telekomunikacijų ir elektroninės apsaugos kompanija: OmniTel, OmniCybe, OmniScreen, OmniSec. Filialuose – ryšio prietaisai pagal planus. 1600 darbuotojų.",
+   "lead": ""
+  },
+  {
+   "name": "Arasaka",
+   "slogan": "Mums rūpi.",
+   "desc": "Pasaulinė megakorporacija: korporacijų apsauga, bankininkystė, gamyba. Klientų žodžiais – patogių paslaugų tiekėja; bankrutavusių verslininkų žodžiais – kompanija, stovinti ant žudikų ir advokatų pečių. Kaune – „logistikos ir klientų aptarnavimo\" pastatas. 1000 darbuotojų.",
+   "lead": "Įkūrėjas Sasai Arasaka (1916); vadovas Saburo Arasaka. Pagrindinė būstinė – Japonija."
+  },
+  {
+   "name": "Militech",
+   "slogan": "",
+   "desc": "Ginklų ir karinių paslaugų milžinė. Kauno Rytų Europos operacijų bazė atidaroma per savaitę – licenciją derino tiesiai su prezidento J. Ramanausko kabinetu.",
+   "lead": ""
+  },
+  {
+   "name": "Genergija",
+   "slogan": "Tikra energija – gera energija.",
+   "desc": "Energijos gavyba ir perdavimas į miestą.",
+   "lead": ""
+  },
+  {
+   "name": "Vandenis",
+   "slogan": "Apdirbtas kiekvienas lašas.",
+   "desc": "Vandens valymo ir perdavimo sistemos.",
+   "lead": ""
+  },
+  {
+   "name": "Medus",
+   "slogan": "",
+   "desc": "Vaistų gamyba ir prekyba.",
+   "lead": ""
+  },
+  {
+   "name": "Trauma Team Inc.",
+   "slogan": "",
+   "desc": "Greitoji medicininė pagalba su ginkluota palyda. Tik prenumeratoriams.",
+   "lead": ""
+  },
+  {
+   "name": "Policija",
+   "slogan": "",
+   "desc": "",
+   "lead": ""
+  },
+  {
+   "name": "KiberPsichozės būrys",
+   "slogan": "",
+   "desc": "",
+   "lead": ""
+  },
+  {
+   "name": "Rėklapis",
+   "slogan": "",
+   "desc": "",
+   "lead": ""
+  },
+  {
+   "name": "Agurkėlis",
+   "slogan": "Koks traškus ir toks gardus.",
+   "desc": "Marinuotų agurkėlių stendai.",
+   "lead": "Duomenų nėra"
+  },
+  {
+   "name": "Transcontinental Airlines",
+   "slogan": "Išskleisk sparnus.",
+   "desc": "Tarpkontinentiniai skrydžiai, kelionių planavimas.",
+   "lead": ""
+  },
+  {
+   "name": "KalkIrPjauk",
+   "slogan": "Tapk kuo nori būti.",
+   "desc": "Mokymai įvairiems gebėjimams gerinti.",
+   "lead": ""
+  },
+  {
+   "name": "Atlas Airlines",
+   "slogan": "Atrask pasaulį.",
+   "desc": "Kontinentiniai skrydžiai, kelionių planavimas.",
+   "lead": ""
+  },
+  {
+   "name": "Barret Industries",
+   "slogan": "Mes statome kelius, kuriais važiuoji.",
+   "desc": "Stato kelius, dažnai sukelia spūstis dėl išstatytų ženklų.",
+   "lead": ""
+  },
+  {
+   "name": "Biotec Sigma",
+   "slogan": "Kaip tikra.",
+   "desc": "Sintetinis maistas ir biocheminė pramonė.",
+   "lead": ""
+  },
+  {
+   "name": "AIRV",
+   "slogan": "Mus renkasi didžiausios įmonės – būkite tarp lyderių ir Jūs!",
+   "desc": "Vertimai iš / į daugiau nei 60 kalbų, maketavimas, grafinis dizainas.",
+   "lead": ""
+  },
+  {
+   "name": "Trikdis",
+   "slogan": "Kuriame patikimas ir inovatyvias pranešimų perdavimo sistemas.",
+   "desc": "Patalpų apsaugos sistemos, eksportas, gamyba.",
+   "lead": ""
+  },
+  {
+   "name": "Auto Aves",
+   "slogan": "Išspręsime visas Jūsų automobilio problemas!",
+   "desc": "Autoservisas, autodetalės.",
+   "lead": ""
+  },
+  {
+   "name": "Ekovalda",
+   "slogan": "Kartu kuriame švaresnį pasaulį!",
+   "desc": "Antrinės žaliavos, atliekų tvarkymas, medicininės atliekos.",
+   "lead": ""
+  },
+  {
+   "name": "IK",
+   "slogan": "Išieškojimas kitaip.",
+   "desc": "Antstoliai, auditas, bankinės operacijos.",
+   "lead": ""
+  },
+  {
+   "name": "Audimas",
+   "slogan": "Tavo stilius mūsų rankose.",
+   "desc": "Motininė įmonė daugeliui aprangos verslų. Itin konkurencinga.",
+   "lead": ""
+  },
+  {
+   "name": "Konfidena",
+   "slogan": "Sukurkime tai kartu.",
+   "desc": "Verslų apskaita, steigimas ir auditai.",
+   "lead": ""
+  },
+  {
+   "name": "Dai Lung",
+   "slogan": "Įkvėpk grynesnio dūmo.",
+   "desc": "Cigarečių ir įvairių įkvepiamųjų aparatų gamyba. Taip pat – ginklai (Critical Magnum).",
+   "lead": "Dai Lungas"
+  },
+  {
+   "name": "Alpeka",
+   "slogan": "Toms sunkiai pasiekiamoms vietoms.",
+   "desc": "Aukštalipių paslaugos, santechnika, statyba, šildymas, vamzdynai, nuotekų valymas. <250 darbuotojų.",
+   "lead": ""
+  },
+  {
+   "name": "Kautra",
+   "slogan": "Su mumis keliauti patogiau.",
+   "desc": "Automobilių, autobusų nuoma ir saugaus transportavimo paslaugos. >500 darbuotojų.",
+   "lead": ""
+  },
+  {
+   "name": "Festo",
+   "slogan": "",
+   "desc": "Pramonės įrenginių gamybos, diegimo ir automatizacijos lyderis. Vieni pirmųjų robotizacijoje. >500 darbuotojų.",
+   "lead": "Peka Pekad (1925), Vokietija"
+  }
+ ],
+ "parties": [
+  {
+   "name": "Vienybės partija",
+   "desc": "Stipri, centralizuota valdžia; valstybės valdymą palikti valdžiai. Daug įstatymų, mokesčių ir baudų. Kontrolė jų rankose."
+  },
+  {
+   "name": "Laisvės partija",
+   "desc": "Individualaus žmogaus teisės, minimalus kišimasis į žmonių gyvenimus."
+  },
+  {
+   "name": "Progresyvioji partija",
+   "desc": "Socialinio teisingumo ir lygybės visiems siekėjai."
+  },
+  {
+   "name": "Konservatoriai",
+   "desc": "Tradicinės vertybės, mažai kišasi į žmonių gyvenimus."
+  },
+  {
+   "name": "Žalioji partija",
+   "desc": "Visi įstatymai pirmiausia vertinami pagal poveikį aplinkai: atsinaujinantys šaltiniai, efektyvi energija."
+  },
+  {
+   "name": "Socialistų partija",
+   "desc": "Lygus turto ir išteklių paskirstymas – ir aukštas kišimasis į gyvenimą."
+  },
+  {
+   "name": "Komunistų partija",
+   "desc": "Viskas priklauso valstybei, kuri dalija turtą ir išteklius. Aukštas kišimasis į žmonių gyvenimus."
+  },
+  {
+   "name": "Nacionalistų partija",
+   "desc": "Etninės tapatybės ir valstybingumo išlaikymas."
+  },
+  {
+   "name": "Darbo partija",
+   "desc": "Aukščiausias dėmesys industrijai, darbuotojams ir korporacijoms."
+  },
+  {
+   "name": "Kapitolijaus partija",
+   "desc": "Laisva rinka; korporacijų teisės aukščiau žmonių."
+  },
+  {
+   "name": "ReBen partija",
+   "desc": "Atstovauja religinėms bendruomenėms ir leidžia joms reikalingus įstatymus."
+  }
+ ]
+}

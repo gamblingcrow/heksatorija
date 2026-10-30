@@ -1,0 +1,238 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.884,
+     54.914
+    ]
+   },
+   "properties": {
+    "name": "Slabotkė",
+    "category": "rajonas",
+    "description": "Vilijampolės senamiestis. Gaujų širdis: Sunkiasvoriai, Skeltavamzdžiai, Skerdikai, GAZ.",
+    "wiki": "Vietos/Slabotkė"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.88,
+     54.9235
+    ]
+   },
+   "properties": {
+    "name": "Sunkiasvoriai",
+    "category": "gauja",
+    "description": "Slabotkės šiaurė. Barai, tarpuvartės, bordinės beretės."
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.8945,
+     54.9105
+    ]
+   },
+   "properties": {
+    "name": "Skeltavamzdžiai",
+    "category": "gauja",
+    "description": "Slabotkės rytai, prie centrinio tilto. Medžiokliniai ginklai juodojoje rinkoje."
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.86,
+     54.9275
+    ]
+   },
+   "properties": {
+    "name": "Skerdikai",
+    "category": "gauja",
+    "description": "Tolimasis šiaurės vakarų Slabotkės kampas. Neik ten."
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.87,
+     54.9075
+    ]
+   },
+   "properties": {
+    "name": "GAZ",
+    "category": "gauja",
+    "description": "Slabotkės pietvakariai. Motociklai, svarkės, šeima."
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.905,
+     54.8845
+    ]
+   },
+   "properties": {
+    "name": "Aleksotas",
+    "category": "rajonas",
+    "description": "Bombonešių teritorija. Granatų aidas per visą rajoną.",
+    "wiki": "Vietos/Aleksotas"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.895,
+     54.88
+    ]
+   },
+   "properties": {
+    "name": "Bombonešiai",
+    "category": "gauja",
+    "description": "Sprogdina turtą, ne žmones. Dažniausiai."
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.9278,
+     54.9262
+    ]
+   },
+   "properties": {
+    "name": "VII fortas",
+    "category": "gauja",
+    "description": "Maelstromų bazė. Kiberpsichozė čia — ne išimtis, o taisyklė.",
+    "wiki": "Vietos/VII fortas"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.956,
+     54.886
+    ]
+   },
+   "properties": {
+    "name": "Šančiai",
+    "category": "rajonas",
+    "description": "Lietpalčių centras. Senos kareivinės, nauja neapykanta.",
+    "wiki": "Vietos/Šančiai"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     24.03,
+     54.893
+    ]
+   },
+   "properties": {
+    "name": "Paleksos rajonas",
+    "category": "rajonas",
+    "description": "Kiberįrangos ir protezų meistrai. Tikslią vietą patikslins GM.",
+    "wiki": "Vietos/Paleksas"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.933,
+     54.9045
+    ]
+   },
+   "properties": {
+    "name": "Arasaka — Kauno filialas",
+    "category": "korporacija",
+    "description": "Vidutinio aukščio pastatas. Oficialiai — logistika ir klientų aptarnavimas.",
+    "wiki": "Organizacijos/Arasaka"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     24.07,
+     54.956
+    ]
+   },
+   "properties": {
+    "name": "Militech — Rytų Europos bazė",
+    "category": "korporacija",
+    "description": "Atidaroma per savaitę. Licencija derinta su prezidentūra.",
+    "wiki": "Organizacijos/Militech"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.914,
+     54.8972
+    ]
+   },
+   "properties": {
+    "name": "Centras / Laisvės alėja",
+    "category": "rajonas",
+    "description": "Stileivos, neonas, brangūs klubai. Drugiai sukasi aplink."
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.893,
+     54.8955
+    ]
+   },
+   "properties": {
+    "name": "Senamiestis — Prezidentūra",
+    "category": "policija",
+    "description": "Lietuvos valdžios centras nuo 2005-ųjų.",
+    "wiki": "Istorija/Prezidentai"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     23.9285,
+     54.8935
+    ]
+   },
+   "properties": {
+    "name": "Kauno policijos būstinė",
+    "category": "policija",
+    "description": "Prisiekę ginti ir tarnauti. Kai kurie — už papildomą mokestį."
+   }
+  }
+ ]
+}

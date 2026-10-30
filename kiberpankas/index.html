@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KiberPankas — Kaunas 2023</title>
+<meta name="description" content="KiberPankas: stalo vaidmenų žaidimo pasaulis. Kaunas, 2023. Wiki, žemėlapis, parduotuvė, transliacijos ir žaidėjų terminalas.">
+<link rel="icon" href="img/emblem.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;800;900&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/kp.css">
+</head>
+<body>
+
+<!-- ============ FONAS ============ -->
+<div id="bg" aria-hidden="true">
+  <canvas id="bg-canvas"></canvas>
+  <div id="bg-video"></div>
+  <div class="fx-dim"></div>
+  <div class="fx-scan"></div>
+  <div class="fx-grain"></div>
+</div>
+
+<div class="desk">
+
+  <!-- ============ GROTUVAS / NAVIGACIJA ============ -->
+  <aside class="deck win" id="deck">
+    <header class="tbar">
+      <span class="tbar-ico"></span>
+      <span class="tbar-stripe"></span>
+      <span class="tbar-title">KIBERPANKAS</span>
+      <span class="tbar-stripe"></span>
+      <button class="tbar-btn" id="shade-btn" title="Suskleisti" aria-label="Suskleisti meniu">_</button>
+    </header>
+
+    <div class="deck-body">
+      <div class="lcd">
+        <div class="lcd-row">
+          <div class="lcd-clock" id="lcd-clock">00:00</div>
+          <div class="lcd-meta">
+            <span class="lcd-tag" id="lcd-date">2023.--.--</span>
+            <span class="lcd-tag">KNS</span>
+            <span class="lcd-tag lcd-tag--live" id="lcd-live">OFF AIR</span>
+          </div>
+        </div>
+        <div class="lcd-marquee"><span id="lcd-ticker"></span></div>
+        <canvas class="lcd-viz" id="lcd-viz" width="232" height="34"></canvas>
+      </div>
+
+      <div class="deck-slider" aria-hidden="true">
+        <span class="lbl">ŽMOGIŠKUMAS</span>
+        <span class="track"><span class="thumb" id="humanity-thumb"></span></span>
+      </div>
+
+      <nav class="plist" id="nav" aria-label="Pagrindinis meniu">
+        <a href="#/" data-route="home"><b>01.</b><span>Pagrindinis</span><i>00:23</i></a>
+        <a href="#/wiki" data-route="wiki"><b>02.</b><span>Archyvas / Wiki</span><i>∞</i></a>
+        <a href="#/gop" data-route="gop"><b>03.</b><span>Grupuotės</span><i>25</i></a>
+        <a href="#/zemelapis" data-route="map"><b>04.</b><span>Žemėlapis</span><i>KNS</i></a>
+        <a href="#/parduotuve" data-route="shop"><b>05.</b><span>Parduotuvė</span><i>EB</i></a>
+        <a href="#/eteris" data-route="live"><b>06.</b><span>Eteris / Foundry</span><i>LIVE</i></a>
+        <a href="#/terminalas" data-route="me" class="plist-me"><b>07.</b><span id="nav-me">Terminalas</span><i id="nav-me-tag">LOCK</i></a>
+      </nav>
+
+      <div class="deck-ctrl" aria-hidden="true">
+        <span class="kbtn">⏮</span><span class="kbtn">▶</span><span class="kbtn">⏸</span><span class="kbtn">⏹</span><span class="kbtn">⏭</span>
+        <span class="deck-brand">KP·AMP</span>
+      </div>
+
+      <div class="deck-user" id="deck-user"></div>
+    </div>
+  </aside>
+
+  <!-- ============ TURINIO LANGAS ============ -->
+  <main class="main win" id="main">
+    <header class="tbar">
+      <span class="tbar-ico"></span>
+      <span class="tbar-stripe"></span>
+      <span class="tbar-title" id="win-title">PAGRINDINIS</span>
+      <span class="tbar-stripe"></span>
+      <a class="tbar-btn" href="#/" title="Į pradžią" aria-label="Į pradžią">×</a>
+    </header>
+    <div class="main-body" id="view" tabindex="-1"></div>
+    <footer class="sbar">
+      <span id="sbar-left">SISTEMA PARUOŠTA</span>
+      <span id="sbar-mode"></span>
+    </footer>
+  </main>
+
+  <!-- ============ VĖLIAVA ============ -->
+  <div class="banner" aria-hidden="true">
+    <img src="img/emblem.svg" alt="">
+    <span>KAUNAS SAUGUS · KOL KAS</span>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="vendor/marked.min.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/togeojson.umd.js"></script>
+<script src="vendor/supabase/supabase.js"></script>
+<script src="js/util.js"></script>
+<script src="js/bg.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/views/home.js"></script>
+<script src="js/views/wiki.js"></script>
+<script src="js/views/gop.js"></script>
+<script src="js/views/map.js"></script>
+<script src="js/views/shop.js"></script>
+<script src="js/views/live.js"></script>
+<script src="js/views/me.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

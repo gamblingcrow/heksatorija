@@ -1,0 +1,51 @@
+{
+  "_pastaba": "Pavyzdinės prekės ir kainos. Greitam atnaujinimui naudok Google Sheets (žr. js/config.js → shop.sheetCsv).",
+  "shops": [
+    { "id": "pirmasis-suvis", "name": "Pirmasis Šūvis", "keeper": "—", "desc": "Ginklų krautuvė. Legaliai – medžiokliniai ir savigynos ginklai. Nelegaliai – viskas, ko paklausi tyliai." },
+    { "id": "sarvai-rubai", "name": "Šarvai ir rūbai", "keeper": "—", "desc": "Kevlaras, oda ir optika. Atrodyk gerai, mirk vėliau." },
+    { "id": "kibernetika", "name": "Kibernetika", "keeper": "Paleksos protezų meistrai", "desc": "Implantai ir protezai. Kiekvienas implantas kainuoja ne tik eurobaksus – ir žmogiškumą." },
+    { "id": "iranga", "name": "Įranga", "keeper": "—", "desc": "Įrankiai, elektronika, smulkmenos, be kurių neišgyvensi darbe." }
+  ],
+  "items": [
+    { "shop": "Pirmasis Šūvis", "name": "Peilis", "type": "Melee", "dmg": "1d6", "rof": 2, "ammo": "—", "range": "—", "price": 20, "rarity": "kasdienė", "desc": "Paprastas, patikimas, tylus." },
+    { "shop": "Pirmasis Šūvis", "name": "Kardas", "type": "Melee", "dmg": "2d6+2", "rof": 2, "ammo": "—", "range": "—", "price": 100, "rarity": "brangi", "desc": "Plienas, ne plastikas." },
+    { "shop": "Pirmasis Šūvis", "name": "Kirvis", "type": "Melee", "dmg": "2d6+3", "rof": 2, "ammo": "—", "range": "—", "price": 20, "rarity": "kasdienė", "desc": "−1 prie atakos. Malkoms ir ne tik." },
+    { "shop": "Pirmasis Šūvis", "name": "Kastetas", "type": "Melee", "dmg": "1d6+2", "rof": 2, "ammo": "—", "range": "—", "price": 20, "rarity": "kasdienė", "desc": "" },
+    { "shop": "Pirmasis Šūvis", "name": "Mačetė", "type": "Melee", "dmg": "1d6+3", "rof": 2, "ammo": "—", "range": "—", "price": 50, "rarity": "kasdienė", "desc": "" },
+    { "shop": "Pirmasis Šūvis", "name": "Katana", "type": "Melee", "dmg": "4d6", "rof": 2, "ammo": "—", "range": "—", "price": 500, "rarity": "reta", "desc": "Piercing. Kai nori, kad apie tave kalbėtų." },
+    { "shop": "Pirmasis Šūvis", "name": "Benzo pjūklas", "type": "Melee", "dmg": "3d6", "rof": 1, "ammo": "kuras", "range": "—", "price": 100, "rarity": "brangi", "desc": "Garsus. Labai garsus." },
+    { "shop": "Pirmasis Šūvis", "name": "Colt Alpha", "type": "Pistoletas", "dmg": "2d6+2", "rof": 2, "ammo": "8", "range": "50", "price": 100, "rarity": "kasdienė", "desc": "Klasika gatvėse." },
+    { "shop": "Pirmasis Šūvis", "name": "Dai Lung Critical Magnum", "type": "Pistoletas", "dmg": "3d6+1", "rof": 1, "ammo": "6", "range": "50", "price": 500, "rarity": "reta", "desc": "+1 prie atakos, critical +1. Be smartgun jungties – be bonusų." },
+    { "shop": "Pirmasis Šūvis", "name": "Uzi MiniAuto", "type": "SMG", "dmg": "2d6+1", "rof": 1, "ammo": "30", "range": "100", "price": 500, "rarity": "brangi", "desc": "Critical +1." },
+    { "shop": "Pirmasis Šūvis", "name": "Militech Viper", "type": "SMG", "dmg": "2d6+3", "rof": 1, "ammo": "40", "range": "100", "price": 500, "rarity": "brangi", "desc": "" },
+    { "shop": "Pirmasis Šūvis", "name": "Militech Ninja", "type": "Šautuvas", "dmg": "2d6+1", "rof": 1, "ammo": "30", "range": "400", "price": 1000, "rarity": "reta", "desc": "Šturmo šautuvas, critical +2." },
+    { "shop": "Pirmasis Šūvis", "name": "Heckler MMD24", "type": "Šautuvas", "dmg": "5d6", "rof": 1, "ammo": "25", "range": "400", "price": 1000, "rarity": "reta", "desc": "" },
+    { "shop": "Pirmasis Šūvis", "name": "Arbaletas", "type": "Lankas", "dmg": "4d6", "rof": 1, "ammo": "1", "range": "200", "price": 100, "rarity": "brangi", "desc": "Tylus. Strėles galima surinkti." },
+    { "shop": "Pirmasis Šūvis", "name": "Militech granata", "type": "Granata", "dmg": "4d6", "rof": 1, "ammo": "—", "range": "25", "price": 100, "rarity": "nelegali", "desc": "Sprogstamoji." },
+    { "shop": "Pirmasis Šūvis", "name": "Pradurianti granata", "type": "Granata", "dmg": "5d6", "rof": 1, "ammo": "—", "range": "25", "price": 500, "rarity": "nelegali", "desc": "Piercing." },
+    { "shop": "Pirmasis Šūvis", "name": "Apakinanti granata", "type": "Granata", "dmg": "—", "rof": 1, "ammo": "—", "range": "25", "price": 100, "rarity": "brangi", "desc": "Flash. Apakina ir apkurtina." },
+    { "shop": "Pirmasis Šūvis", "name": "C6 Doorknocker", "type": "Sprogmuo", "dmg": "2d6", "rof": 1, "ammo": "—", "range": "—", "price": 100, "rarity": "nelegali", "desc": "Durims. Arba tam, kas už jų." },
+    { "shop": "Pirmasis Šūvis", "name": "C6 Satchel Charge", "type": "Sprogmuo", "dmg": "6d6", "rof": 1, "ammo": "—", "range": "—", "price": 500, "rarity": "nelegali", "desc": "" },
+    { "shop": "Pirmasis Šūvis", "name": "Claymore mina", "type": "Sprogmuo", "dmg": "6d6", "rof": 1, "ammo": "—", "range": "—", "price": 500, "rarity": "nelegali", "desc": "Kryptinė mina." },
+
+    { "shop": "Šarvai ir rūbai", "name": "Kevlarinė maikė / liemenė", "type": "Šarvai", "dmg": "SP 10", "rof": "", "ammo": "", "range": "", "price": 100, "rarity": "kasdienė", "desc": "Tier 2." },
+    { "shop": "Šarvai ir rūbai", "name": "Sunki odinė striukė", "type": "Rūbai", "dmg": "SP 4", "rof": "", "ammo": "", "range": "", "price": 50, "rarity": "kasdienė", "desc": "Tier 2. Atrodo gerai bet kuriame bare." },
+    { "shop": "Šarvai ir rūbai", "name": "Optishields", "type": "Akiniai", "dmg": "SP 8", "rof": "", "ammo": "", "range": "", "price": 100, "rarity": "brangi", "desc": "Antidazzle." },
+    { "shop": "Šarvai ir rūbai", "name": "Tamsios odos paltas", "type": "Rūbai", "dmg": "SP 4", "rof": "", "ammo": "", "range": "", "price": 100, "rarity": "kasdienė", "desc": "Su juo tave gali supainioti su Lietpalčiais." },
+
+    { "shop": "Kibernetika", "name": "Subdermal Armor", "type": "Implantas", "dmg": "SP 11", "rof": "", "ammo": "", "range": "", "price": 1000, "rarity": "reta", "desc": "Šarvas po oda." },
+    { "shop": "Kibernetika", "name": "Skin Weave", "type": "Implantas", "dmg": "SP 7", "rof": "", "ammo": "", "range": "", "price": 500, "rarity": "brangi", "desc": "" },
+    { "shop": "Kibernetika", "name": "Kiberakis", "type": "Implantas", "dmg": "", "rof": "", "ammo": "", "range": "", "price": 100, "rarity": "brangi", "desc": "Bazinė kiberoptika, 3 vietos priedams." },
+    { "shop": "Kibernetika", "name": "Smartgun jungtis", "type": "Implantas", "dmg": "", "rof": "", "ammo": "", "range": "", "price": 500, "rarity": "brangi", "desc": "Be jos smart ginklai – tik geležis." },
+
+    { "shop": "Įranga", "name": "Cardlock Decryptor", "type": "Elektronika", "price": 500, "rarity": "nelegali", "desc": "" },
+    { "shop": "Įranga", "name": "Binoglasses", "type": "Optika", "price": 100, "rarity": "kasdienė", "desc": "" },
+    { "shop": "Įranga", "name": "Electronics Toolkit", "type": "Įrankiai", "price": 100, "rarity": "kasdienė", "desc": "" },
+    { "shop": "Įranga", "name": "Basic Tech Kit", "type": "Įrankiai", "price": 100, "rarity": "kasdienė", "desc": "" },
+    { "shop": "Įranga", "name": "Glowstik", "type": "Kita", "price": 10, "rarity": "kasdienė", "desc": "" },
+    { "shop": "Įranga", "name": "Duomenų lustas", "type": "Elektronika", "price": 10, "rarity": "kasdienė", "desc": "" },
+    { "shop": "Įranga", "name": "Racija", "type": "Ryšys", "price": 50, "rarity": "kasdienė", "desc": "OmniTel licencija nebūtina." },
+    { "shop": "Įranga", "name": "Dronas", "type": "Elektronika", "price": 500, "rarity": "brangi", "desc": "" },
+    { "shop": "Įranga", "name": "Nešiojamas kompiuteris", "type": "Elektronika", "price": 50, "rarity": "kasdienė", "desc": "" }
+  ]
+}
